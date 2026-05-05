@@ -110,3 +110,5 @@ LOGIN_URL = "login/"
 # Окончание сессии при закрытии браузера отключено
 SESSION_COOKIE_AGE = 60 * 60 * 8
 SESSION_EXPIRE_AT_BROWSER_CLOSE = False
+
+APPEND_SLASH = True
