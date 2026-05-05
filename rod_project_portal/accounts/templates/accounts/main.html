@@ -1,0 +1,344 @@
+{% extends 'accounts/base.html' %}
+
+{% block title %}
+{{ user.username }}
+{% endblock %}
+
+{% block body %}
+<div class="mb-5">
+    <h3 class="mb-3 text-primary">VPN</h3>
+
+    {% for vpn_item in user_vpns %}
+    <div class="card mb-3 bg-body-tertiary">
+        <div class="card-body">
+
+            <strong class="fs-5">{{ vpn_item.vpn.name }}</strong>
+
+            <table class="table table-sm table-borderless mt-2 mb-0">
+                <tbody>
+
+                {% if vpn_item.vpn.qr %}
+                <tr>
+                    <td style="width: 120px;" class="text-secondary">QR для подключения:
+                    <td>
+                        <img src="{{  vpn_item.vpn.qr }}" alt="QR-код" class="img-fluid" style="max-width: 150px;">
+                    </td>
+                </tr>
+                {% endif %}
+
+                {% if vpn_item.vpn.location %}
+                <tr>
+                    <td class="text-secondary">Локация:
+                    <td class="text-break text-secondary">{{ vpn_item.vpn.location }}
+                </tr>
+                {% endif %}
+
+
+                {% if vpn_item.vpn.description %}
+                <tr>
+                    <td class="text-secondary">Описание:
+                    <td class="text-break text-secondary">{{ vpn_item.vpn.description }}
+                </tr>
+                {% endif %}
+
+                {% if vpn_item.vpn.instructions %}
+                <tr>
+                    <td class="text-secondary">Инструкция:
+                    <td class="text-break text-secondary">{{ vpn_item.vpn.instructions }}
+                </tr>
+                {% endif %}
+
+                {% if vpn_item.username %}
+                <tr>
+                    <td class="text-secondary">
+                        Логин:
+                    </td>
+                    <td class="text-break">
+                        <div class="d-flex align-items-center gap-2">
+                            <input type="text" class="form-control form-control-sm bg-body text-body copy-input"
+                                   value="{{  vpn_item.username }}"
+                                   readonly>
+                            <button class="btn btn-dark copy-btn">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor"
+                                     class="bi bi-copy" viewBox="0 0 16 16">
+                                    <path fill-rule="evenodd"
+                                          d="M4 2a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2zm2-1a1 1 0 0 0-1 1v8a1 1 0 0 0 1 1h8a1 1 0 0 0 1-1V2a1 1 0 0 0-1-1zM2 5a1 1 0 0 0-1 1v8a1 1 0 0 0 1 1h8a1 1 0 0 0 1-1v-1h1v1a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h1v1z"/>
+                                </svg>
+                            </button>
+                        </div>
+                    </td>
+                </tr>
+                {% endif %}
+
+                {% if vpn_item.key %}
+                <tr>
+                    <td class="text-secondary">
+                        Ключ для подключения:
+                    </td>
+                    <td class="text-break">
+                        <div class="d-flex align-items-center gap-2">
+                            <input type="text" class="form-control form-control-sm bg-body text-body copy-input"
+                                   value="{{  vpn_item.key }}"
+                                   readonly>
+                            <button class="btn btn-dark copy-btn">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor"
+                                     class="bi bi-copy" viewBox="0 0 16 16">
+                                    <path fill-rule="evenodd"
+                                          d="M4 2a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2zm2-1a1 1 0 0 0-1 1v8a1 1 0 0 0 1 1h8a1 1 0 0 0 1-1V2a1 1 0 0 0-1-1zM2 5a1 1 0 0 0-1 1v8a1 1 0 0 0 1 1h8a1 1 0 0 0 1-1v-1h1v1a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h1v1z"/>
+                                </svg>
+                            </button>
+                        </div>
+                    </td>
+                </tr>
+                {% endif %}
+
+                {% if vpn_item.secret %}
+                <tr>
+                    <td class="text-secondary">
+                        Секрет (пароль):
+                    </td>
+                    <td class="text-break">
+                        <div class="d-flex align-items-center gap-2">
+                            <input type="text" class="form-control form-control-sm bg-body text-body copy-input"
+                                   value="{{  vpn_item.secret }}"
+                                   readonly>
+                            <button class="btn btn-dark copy-btn">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor"
+                                     class="bi bi-copy" viewBox="0 0 16 16">
+                                    <path fill-rule="evenodd"
+                                          d="M4 2a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2zm2-1a1 1 0 0 0-1 1v8a1 1 0 0 0 1 1h8a1 1 0 0 0 1-1V2a1 1 0 0 0-1-1zM2 5a1 1 0 0 0-1 1v8a1 1 0 0 0 1 1h8a1 1 0 0 0 1-1v-1h1v1a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h1v1z"/>
+                                </svg>
+                            </button>
+                        </div>
+                    </td>
+                </tr>
+                {% endif %}
+
+                {% if vpn_item.url %}
+                <tr>
+                    <td class="text-secondary">
+                        Ссылка подписки:
+                    </td>
+                    <td class="text-break">
+                        <div class="d-flex align-items-center gap-2">
+                            <input type="text" class="form-control form-control-sm bg-body text-body copy-input"
+                                   value="{{  vpn_item.url }}"
+                                   readonly>
+                            <button class="btn btn-dark copy-btn">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor"
+                                     class="bi bi-copy" viewBox="0 0 16 16">
+                                    <path fill-rule="evenodd"
+                                          d="M4 2a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2zm2-1a1 1 0 0 0-1 1v8a1 1 0 0 0 1 1h8a1 1 0 0 0 1-1V2a1 1 0 0 0-1-1zM2 5a1 1 0 0 0-1 1v8a1 1 0 0 0 1 1h8a1 1 0 0 0 1-1v-1h1v1a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h1v1z"/>
+                                </svg>
+                            </button>
+                        </div>
+                    </td>
+                </tr>
+                {% endif %}
+
+                </tbody>
+            </table>
+
+        </div>
+    </div>
+    {% endfor %}
+
+    {% for vpn in available_vpns %}
+    <div class="card mb-3 bg-body-tertiary">
+        <div class="card-body">
+
+            <strong class="fs-5">{{ vpn.name }}</strong>
+            <form method="post" action="{% url 'accounts:create_ticket' %}">
+                {% csrf_token %}
+                <input type="hidden" name="service_type" value="vpn">
+                <input type="hidden" name="service_id" value="{{ vpn.id }}">
+                <button type="submit" class="btn btn-primary">Запросить</button>
+            </form>
+
+            <table class="table table-sm table-borderless mt-2 mb-0">
+                <tbody>
+
+                {% if vpn.location %}
+                <tr>
+                    <td class="text-secondary">Локация:
+                    <td class="text-break text-secondary">{{ vpn.location }}
+                </tr>
+                {% endif %}
+
+                {% if vpn.description %}
+                <tr>
+                    <td class="text-secondary">Описание:
+                    <td class="text-break text-secondary">{{ vpn.description }}
+                </tr>
+                {% endif %}
+
+                </tbody>
+            </table>
+
+        </div>
+    </div>
+    {% endfor %}
+
+</div>
+
+<div>
+    <h3 class="mb-5 text-primary">Proxy</h3>
+
+    {% for proxy_item in user_proxies %}
+    <div class="card mb-3 bg-body-tertiary">
+        <div class="card-body">
+            <strong class="fs-5">{{ proxy_item.proxy.name }}</strong>
+            <table class="table table-sm table-borderless mt-2 mb-0">
+                <tbody>
+
+                {% if proxy_item.proxy.location %}
+                <tr>
+                    <td class="text-secondary">Локация:
+                    <td class="text-break text-secondary">{{ proxy_item.proxy.location }}
+                </tr>
+                {% endif %}
+
+                {% if proxy_item.proxy.ip %}
+                <tr>
+                    <td class="text-secondary">
+                        IP:
+                    </td>
+                    <td class="text-break">
+                        <div class="d-flex align-items-center gap-2">
+                            <input type="text" class="form-control form-control-sm bg-body text-body copy-input"
+                                   value="{{ proxy_item.proxy.ip }}"
+                                   readonly>
+                            <button class="btn btn-dark copy-btn">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor"
+                                     class="bi bi-copy" viewBox="0 0 16 16">
+                                    <path fill-rule="evenodd"
+                                          d="M4 2a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2zm2-1a1 1 0 0 0-1 1v8a1 1 0 0 0 1 1h8a1 1 0 0 0 1-1V2a1 1 0 0 0-1-1zM2 5a1 1 0 0 0-1 1v8a1 1 0 0 0 1 1h8a1 1 0 0 0 1-1v-1h1v1a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h1v1z"/>
+                                </svg>
+                            </button>
+                        </div>
+                    </td>
+                </tr>
+                {% endif %}
+
+                {% if proxy_item.proxy.port %}
+                <tr>
+                    <td class="text-secondary">Порт:</td>
+                    <td>{{ proxy_item.proxy.port }}</td>
+                </tr>
+                {% endif %}
+
+                {% if proxy_item.username %}
+                <tr>
+                    <td class="text-secondary">Логин:</td>
+                    <td>{{ proxy_item.username }}</td>
+                </tr>
+                {% endif %}
+
+                {% if proxy_item.secret %}
+                <tr>
+                    <td class="text-secondary">
+                        Секрет (пароль):
+                    </td>
+                    <td class="text-break">
+                        <div class="d-flex align-items-center gap-2">
+                            <input type="text" class="form-control form-control-sm bg-body text-body copy-input"
+                                   value="{{ proxy_item.secret }}"
+                                   readonly>
+                            <button class="btn btn-dark copy-btn">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor"
+                                     class="bi bi-copy" viewBox="0 0 16 16">
+                                    <path fill-rule="evenodd"
+                                          d="M4 2a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2zm2-1a1 1 0 0 0-1 1v8a1 1 0 0 0 1 1h8a1 1 0 0 0 1-1V2a1 1 0 0 0-1-1zM2 5a1 1 0 0 0-1 1v8a1 1 0 0 0 1 1h8a1 1 0 0 0 1-1v-1h1v1a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h1v1z"/>
+                                </svg>
+                            </button>
+                        </div>
+                    </td>
+                </tr>
+                {% endif %}
+
+
+                {% if proxy_item.proxy.description %}
+                <tr>
+                    <td class="text-secondary">Описание:
+                    <td class="text-break text-secondary">{{ proxy_item.proxy.description }}
+                </tr>
+                {% endif %}
+
+                {% if proxy_item.proxy.instructions %}
+                <tr>
+                    <td class="text-secondary">Инструкция:
+                    <td class="text-break text-secondary">{{ proxy_item.proxy.instructions }}
+                </tr>
+                {% endif %}
+
+
+                {% if proxy_item.url %}
+                <tr>
+                    <td class="text-secondary">
+                        Ссылка для быстрого подключения:
+                    </td>
+                    <td class="text-break">
+                        <div class="d-flex align-items-center gap-2">
+                            <input type="text" class="form-control form-control-sm bg-body text-body copy-input"
+                                   value="{{ proxy_item.url }}"
+                                   readonly>
+                            <button class="btn btn-dark copy-btn">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor"
+                                     class="bi bi-copy" viewBox="0 0 16 16">
+                                    <path fill-rule="evenodd"
+                                          d="M4 2a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2zm2-1a1 1 0 0 0-1 1v8a1 1 0 0 0 1 1h8a1 1 0 0 0 1-1V2a1 1 0 0 0-1-1zM2 5a1 1 0 0 0-1 1v8a1 1 0 0 0 1 1h8a1 1 0 0 0 1-1v-1h1v1a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h1v1z"/>
+                                </svg>
+                            </button>
+                        </div>
+                    </td>
+                </tr>
+                {% endif %}
+
+                </tbody>
+            </table>
+        </div>
+    </div>
+    {% endfor %}
+
+    {% for proxy in available_proxies %}
+    <div class="card mb-3 bg-body-tertiary">
+        <div class="card-body">
+            <strong class="fs-5">{{ proxy.name }}</strong>
+
+            <form method="post" action="{% url 'accounts:create_ticket' %}">
+                {% csrf_token %}
+                <input type="hidden" name="service_type" value="proxy">
+                <input type="hidden" name="service_id" value="{{ proxy.id }}">
+                <button type="submit" class="btn btn-primary">Запросить</button>
+            </form>
+
+            <table class="table table-sm table-borderless mt-2 mb-0">
+                <tbody>
+
+                {% if proxy.location %}
+                <tr>
+                    <td class="text-secondary">Локация:
+                    <td class="text-break text-secondary">{{ proxy.location }}
+                </tr>
+                {% endif %}
+
+
+                {% if proxy.description %}
+                <tr>
+                    <td class="text-secondary">Описание:
+                    <td class="text-break text-secondary">{{ proxy.description }}
+                </tr>
+                {% endif %}
+
+                </tbody>
+            </table>
+        </div>
+    </div>
+    {% endfor %}
+
+</div>
+{% endblock %}
+{% block scripts %}
+<script src="/static/js/copy.js"></script>
+<script src="/static/js/notification.js"></script>
+{% endblock %}

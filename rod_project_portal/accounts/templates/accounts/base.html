@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="ru" data-bs-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <title>
+        {% block title %}
+        {% endblock %}
+    </title>
+    {% load static %}
+    <link rel="icon" href="{% static 'favicon.ico' %}" type="image/x-icon">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.7/dist/css/bootstrap.min.css" rel="stylesheet"
+          integrity="sha384-LN+7fdVzj6u52u30Kp6M/trliBMCMKTyK833zpbD+pXdCLuTusPj697FH4R/5mcr" crossorigin="anonymous">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+</head>
+
+<body>
+
+<header class="border-bottom">
+    <div class="container-fluid">
+        <div class="d-flex flex-wrap align-items-center justify-content-between py-2">
+
+            <div class="d-flex align-items-center">
+                <a href="{% url 'accounts:main' %}"
+                   class="d-inline-flex link-body-emphasis text-decoration-none me-3 fs-4">
+                    Rod Project<span class="ms-2 fw-bold text-secondary">Portal</span>
+                </a>
+            </div>
+
+            {% if user.is_authenticated %}
+            <div><span class="text-secondary">Не передавайте ключи посторонним. Это всех погубит.</span></div>
+
+            <div class="d-flex align-items-center gap-3">
+
+                {% if unread_count > 0 %}
+                <a href="{% url 'accounts:notifications' %}" class="btn position-relative">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" fill="red"
+                         class="bi bi-bell" viewBox="0 0 16 16">
+                        <path d="M8 16a2 2 0 0 0 2-2H6a2 2 0 0 0 2 2M8 1.918l-.797.161A4 4 0 0 0 4 6c0 .628-.134 2.197-.459 3.742-.16.767-.376 1.566-.663 2.258h10.244c-.287-.692-.502-1.49-.663-2.258C12.134 8.197 12 6.628 12 6a4 4 0 0 0-3.203-3.92zM14.22 12c.223.447.481.801.78 1H1c.299-.199.557-.553.78-1C2.68 10.2 3 6.88 3 6c0-2.42 1.72-4.44 4.005-4.901a1 1 0 1 1 1.99 0A5 5 0 0 1 13 6c0 .88.32 4.2 1.22 6"/>
+                    </svg>
+                    <span>+{{ unread_count }}</span>
+                </a>
+                {% else %}
+                <a href="{% url 'accounts:notifications' %}" class="btn position-relative">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" fill="currentColor"
+                         class="bi bi-bell" viewBox="0 0 16 16">
+                        <path d="M8 16a2 2 0 0 0 2-2H6a2 2 0 0 0 2 2M8 1.918l-.797.161A4 4 0 0 0 4 6c0 .628-.134 2.197-.459 3.742-.16.767-.376 1.566-.663 2.258h10.244c-.287-.692-.502-1.49-.663-2.258C12.134 8.197 12 6.628 12 6a4 4 0 0 0-3.203-3.92zM14.22 12c.223.447.481.801.78 1H1c.299-.199.557-.553.78-1C2.68 10.2 3 6.88 3 6c0-2.42 1.72-4.44 4.005-4.901a1 1 0 1 1 1.99 0A5 5 0 0 1 13 6c0 .88.32 4.2 1.22 6"/>
+                    </svg>
+                </a>
+
+                {% endif %}
+
+                {% if user_is_admin %}
+                <a href="{% url 'admin:index' %}"
+                   class="btn btn-dark w-auto" target="_blank">
+                    Админка
+                </a>
+                {% endif %}
+
+                <form method="post" action="{% url 'accounts:logout' %}">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-outline-secondary">Выйти</button>
+                </form>
+
+                {% else %}
+                <a href="{% url 'accounts:login' %}" class="btn btn-outline-primary">Войти</a>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</header>
+
+<div class="container p-0 mt-2">
+
+    <div id="flash-messages">
+        {% if messages %}
+        {% for message in messages %}
+        <div class="alert alert-{% if message.tags == 'error' %}danger{% else %}{{ message.tags }}{% endif %} alert-dismissible fade show shadow"
+             role="alert">
+            {{ message }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+        {% endfor %}
+        {% endif %}
+    </div>
+
+    {% block body %}
+    {% endblock %}
+</div>
+
+<footer class="py-3 my-4">
+    <ul class="nav justify-content-center pb-3 mb-3">
+        <li class="nav-item">
+            <a href="mailto:rod.project@yandex.ru?subject=Вопрос%20по%20проекту&body=Здравствуйте%2C%20у%20меня%20есть%20вопрос..."
+               class="nav-link px-2 text-body-secondary">
+                rod.project@yandex.ru
+            </a>
+        </li>
+        <li class="nav-item">
+            <a href="https://t.me/like_america"
+               target="_blank"
+               class="nav-link px-2 text-body-secondary">
+                Telegram
+            </a>
+        </li>
+        <li class="nav-item">
+            <a href="https://youtubick.ru"
+               target="_blank"
+               class="nav-link px-2 text-body-secondary">
+                YouTubick
+            </a>
+        </li>
+    </ul>
+</footer>
+
+{% block scripts %}
+{% endblock %}
+<script src="/static/js/notifications_modal.js"></script>
+</body>
+</html>

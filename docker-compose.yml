@@ -1,0 +1,15 @@
+services:
+  portal:
+    build:
+      dockerfile: ./Dockerfile
+    container_name: rod_project_portal_container
+    env_file: .env
+    command: >
+      sh -c "python manage.py migrate &&
+             python manage.py loaddata accounts/fixtures/initial_data.json &&
+             python manage.py collectstatic --noinput &&
+    ports:
+      - "8000:8000"
+    volumes:
+      - /var/www/static:/rod_project_portal/static
+    restart: unless-stopped

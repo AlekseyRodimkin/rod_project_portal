@@ -1,0 +1,43 @@
+{% extends 'accounts/base.html' %}
+
+{% block title %}Register{% endblock %}
+
+<h1>
+    {% block header %}
+    'Регистрация'
+    {% endblock %}
+</h1>
+
+{% block body %}
+<div class="row justify-content-center">
+    <div class="col-12 col-sm-8 col-md-6 col-lg-4">
+
+
+        <form method="post" class="card p-4 shadow">
+            <h2 class="text-center mb-4">Регистрация</h2>
+
+            {% csrf_token %}
+
+            {% if error %}
+            <div class="alert alert-danger">{{ error }}</div>
+            {% endif %}
+
+            {% for field in form %}
+            <div class="mb-3">
+                <label for="{{ field.id_for_label }}" class="form-label">{{ field.label }}</label>
+                {{ field }}
+                {% if field.errors %}
+                <div class="text-danger small">
+                    {{ field.errors }}
+                </div>
+                {% endif %}
+            </div>
+            {% endfor %}
+
+            <button type="submit" class="btn btn-primary w-100">Регистрация</button>
+        </form>
+
+
+    </div>
+</div>
+{% endblock %}
