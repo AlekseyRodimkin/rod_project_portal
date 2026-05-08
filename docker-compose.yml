@@ -7,6 +7,7 @@ services:
     command: >
       sh -c "python manage.py migrate &&
              python manage.py collectstatic --noinput &&
+             python manage.py loaddata accounts/fixtures/initial_data.json &&
              gunicorn --bind 0.0.0.0:8000 rod_project_portal.wsgi:application"
     ports:
       - "8000:8000"
