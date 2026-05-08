@@ -13,5 +13,6 @@ services:
       - "8000:8000"
     volumes:
       - /var/www/rod_project_portal/static:/rod_project_portal/static:ro
+<<<<<<< HEAD
       - ./db:/app/db
     restart: unless-stopped
