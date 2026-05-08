@@ -67,6 +67,8 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'rod_project_portal.wsgi.application'
 
+db_dir = os.path.join(BASE_DIR, "db")
+db_dir.mkdir(exist_ok=True)
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.sqlite3',
