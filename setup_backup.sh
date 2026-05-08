@@ -23,18 +23,18 @@ source "$(cd "$(dirname "${BASH_SOURCE[0]}")/../" && pwd)/.env"
 set +a
 
 DATE=$(date +%Y-%m-%d)
-SQL_FILE="$PROJECT_DIR/rp_portal_backup/backups/backup-$DATE.sql"
+SQL_FILE="$PROJECT_DIR/rp_portal_backup/backups/backup-$DATE.sqlite3"
 CRYPTED_FILE="$PROJECT_DIR/rp_portal_backup/backups/backup-$DATE.gpg"
 
 echo 'Копия файла базы данных'
-docker exec -t rod_project_portal_container cp db.sqlite3 db.sqlite3_copy
+cp "$PROJECT_DIR/db/db.sqlite3" "$SQLITE_BACKUP"
 
 echo 'Шифрование'
 # gpg --encrypt --recipient "$PUB_KEY_ID" -o "$CRYPTED_FILE" "db.sqlite3_copy"
-gpg --batch --yes --trust-model always --encrypt --recipient "$PUB_KEY_ID" -o "$CRYPTED_FILE" "db.sqlite3_copy"
+gpg --batch --yes --trust-model always --encrypt --recipient "$PUB_KEY_ID" -o "$CRYPTED_FILE" "$SQLITE_BACKUP"
 
 echo 'Удаляем исходный нешифрованный файл'
-rm -f "db.sqlite3_copy"
+rm -f "$SQLITE_BACKUP"
 
 echo 'Отправка файла'
 
