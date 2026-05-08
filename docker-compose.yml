@@ -10,6 +10,6 @@ services:
     ports:
       - "8000:8000"
     volumes:
-      - /var/www/html/rod_project_portal/static:/rod_project_portal/static:ro
+      - /var/www/html/rod_project_portal/static:/rod_project_portal/static
       - ./db:/app/db
     restart: unless-stopped
