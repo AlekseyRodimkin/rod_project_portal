@@ -12,5 +12,5 @@ services:
     ports:
       - "8000:8000"
     volumes:
-      - /var/www/static:/rod_project_portal/static:ro
+      - /var/www/rod_project_portal/static:/rod_project_portal/static:ro
     restart: unless-stopped
