@@ -83,7 +83,7 @@ fi
 
 echo 'Запрос ссылки по url: "https://cloud-api.yandex.net/v1/disk/resources/upload?path=app:/rod-project-portal/$FILE_NAME&overwrite=true"'
 UPLOAD_URL=$(curl -s -H "Authorization: OAuth $TOKEN" \
-  "https://cloud-api.yandex.net/v1/disk/resources/upload?path=/rod-project-portal/$FILE_NAME&overwrite=true" | \
+  "https://cloud-api.yandex.net/v1/disk/resources/upload?path=app:/rod-project-portal/$FILE_NAME&overwrite=true" | \
   jq -r '.href')
 
 if [[ -z "$UPLOAD_URL" || "$UPLOAD_URL" == "null" ]]; then
