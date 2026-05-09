@@ -23,7 +23,7 @@ source "$(cd "$(dirname "${BASH_SOURCE[0]}")/../" && pwd)/.env"
 set +a
 
 DATE=$(date +%Y-%m-%d)
-SQL_FILE="$PROJECT_DIR/rp_portal_backup/backups/backup-$DATE.sqlite3"
+SQLITE_BACKUP="$PROJECT_DIR/rp_portal_backup/backups/backup-$DATE.sqlite3"
 CRYPTED_FILE="$PROJECT_DIR/rp_portal_backup/backups/backup-$DATE.gpg"
 
 echo 'Копия файла базы данных'

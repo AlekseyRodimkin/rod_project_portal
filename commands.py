@@ -24,6 +24,10 @@
 # /etc/letsencrypt/live/<domain>/fullchain.pem
 # /etc/letsencrypt/live/<domain>/privkey.pem
 
+"""Удаление сертификатов"""
+# sudo  certbot certificates
+# sudo certbot delete --cert-name <domain>
+
 """После генерации нужно прокинуть volume на каждый сертификат внутрь docker-compose.yml"""
 # /opt/remnawave - папка remnawave
 # /opt/remnawave/docker-compose.yml
