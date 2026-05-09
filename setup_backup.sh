@@ -58,7 +58,7 @@ send_bot_notif() {
          -d "text=${text}" > /dev/null
 }
 echo 'Создаем папку приложения на Диске'
-first_req_url="https://cloud-api.yandex.net/v1/disk/resources?path=app:/$YANDEX_FOLDER:/"
+first_req_url="https://cloud-api.yandex.net/v1/disk/resources?path=app:/$YANDEX_FOLDER/"
 RESPONSE=$(curl -s -w "%{http_code}" -H "Authorization: OAuth $TOKEN" "$first_req_url")
 STATUS_CODE=${RESPONSE: -3}
 BODY=${RESPONSE%???}
@@ -70,6 +70,7 @@ else
     if command -v jq >/dev/null 2>&1 && [ -n "$BODY" ]; then
         ERROR_MESSAGE=$(echo "$BODY" | jq -r '.message // .description // .error // "Неизвестная ошибка"')
         echo "Описание: $ERROR_MESSAGE"
+        echo "Ресурс: $first_req_url"
     else
         if [ -n "$BODY" ]; then
             echo "Тело ответа:"
