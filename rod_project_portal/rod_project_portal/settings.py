@@ -27,6 +27,10 @@ ALLOWED_HOSTS = [
     "DJANGO_ALLOWED_HOSTS", ""
 ).split(",")
 
+CSRF_TRUSTED_ORIGINS = [
+    "https://rod-project.24-7.ro",
+]
+
 INSTALLED_APPS = [
     'django.contrib.admin',
     'django.contrib.auth',
