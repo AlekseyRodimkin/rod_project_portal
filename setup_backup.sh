@@ -42,7 +42,6 @@ FILE_PATH="$CRYPTED_FILE"
 FILE_NAME=$(basename "$FILE_PATH")
 DIR_PATH=$(dirname "$FILE_PATH")
 TOKEN="${YANDEX_TOKEN:?YANDEX_TOKEN не задан}"
-YANDEX_FOLDER="$YANDEX_APP_NAME"
 KEEP=${KEEP_BACKUPS:-5}
 
 send_bot_notif() {
@@ -58,7 +57,7 @@ send_bot_notif() {
          -d "text=${text}" > /dev/null
 }
 echo 'Создаем папку приложения на Диске'
-first_req_url="https://cloud-api.yandex.net/v1/disk/resources?path=app:/$YANDEX_FOLDER/"
+first_req_url="https://cloud-api.yandex.net/v1/disk/resources?path=app:/rod-project-portal/"
 RESPONSE=$(curl -s -w "%{http_code}" -H "Authorization: OAuth $TOKEN" "$first_req_url")
 STATUS_CODE=${RESPONSE: -3}
 BODY=${RESPONSE%???}
@@ -82,7 +81,7 @@ else
     exit
 fi
 
-echo 'Запрос ссылки по url: https://cloud-api.yandex.net/v1/disk/resources/upload?path=/$YANDEX_FOLDER/$FILE_NAME&overwrite=true'
+echo 'Запрос ссылки по url: https://cloud-api.yandex.net/v1/disk/resources/upload?path=/rod-project-portal/$FILE_NAME&overwrite=true'
 UPLOAD_URL=$(curl -s -H "Authorization: OAuth $TOKEN" \
   "https://cloud-api.yandex.net/v1/disk/resources/upload?path=/$YANDEX_FOLDER/$FILE_NAME&overwrite=true" | \
   jq -r '.href')
