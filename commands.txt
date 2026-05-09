@@ -1,1 +1,6 @@
-docker-compose down && docker-compose up -d --build
+docker compose down && docker-compose up -d --build
+docker compose up -d && docker-compose logs -f
+sudo scp -i ~/Desktop/vdsina_ssh_key_2 -P 43564 /Users/alex/Desktop/PycharmProjects/rod_project_portal/rod_project_portal/db/db.sqlite3 alex@144.124.229.249:~/projects/rod_project_portal/db
+
+docker compose down
+docker compose up --build -d
