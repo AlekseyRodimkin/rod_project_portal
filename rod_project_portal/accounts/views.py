@@ -34,8 +34,8 @@ class Main(LoginRequiredMixin, TemplateView):
         user_proxy_ids = user_proxies.values_list('proxy_id', flat=True)
 
         # Все доступные VPN и Proxy
-        all_vpns = VPN.objects.all()
-        all_proxies = Proxy.objects.all()
+        all_vpns = VPN.objects.all().order_by('created_at')
+        all_proxies = Proxy.objects.all().order_by('created_at')
 
         # Те, которых нет у пользователя
         available_vpns = all_vpns.exclude(id__in=user_vpn_ids)
