@@ -1,13 +1,29 @@
-from django.contrib.auth.views import LogoutView
 from django.urls import reverse_lazy
-from django.views.generic import TemplateView, ListView
-from django.contrib.auth.mixins import LoginRequiredMixin
 from django.shortcuts import redirect
-from django.contrib.auth.decorators import login_required
 from django.contrib import messages
-from .models import GlobalNotification, UserNotification
+from django.contrib.auth.views import LogoutView, LoginView
+from django.contrib.auth.mixins import LoginRequiredMixin
+from django.contrib.auth.decorators import login_required
+from django.views.generic import TemplateView, ListView
+from django.utils.decorators import method_decorator
+from django_ratelimit.decorators import ratelimit
 
 from .models import UserProxy, UserVPN, VPN, Proxy, UserTickets, UserNotification, GlobalNotification
+
+
+@method_decorator(
+    ratelimit(
+        key='ip',
+        rate='5/10m',
+        method='POST',
+        block=True
+    ),
+    name='dispatch'
+)
+class AppLoginView(LoginView):
+    template_name = "accounts/login.html"
+    redirect_authenticated_user = True
+    next_page = "accounts:main"
 
 
 class AppLogoutView(LoginRequiredMixin, LogoutView):

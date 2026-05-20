@@ -1,19 +1,13 @@
-from django.contrib.auth.views import LoginView
 from django.urls import path
-
 from .views import (
-    AppLogoutView, Main, create_ticket, NotificationsView
+    AppLogoutView, Main, create_ticket, NotificationsView, AppLoginView
 )
 
 app_name = "accounts"
 urlpatterns = [
     path(
         "login/",
-        LoginView.as_view(
-            template_name="accounts/login.html",
-            redirect_authenticated_user=True,
-            next_page="accounts:main",
-        ),
+        AppLoginView.as_view(),
         name="login",
     ),
     path("logout/", AppLogoutView.as_view(), name="logout"),

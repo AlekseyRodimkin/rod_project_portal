@@ -12,4 +12,11 @@ services:
     volumes:
       - /var/www/rod_project_portal/static:/app/static
       - ./db:/app/db
+    depends_on:
+      - redis
+    restart: unless-stopped
+
+  redis:
+    image: redis:7-alpine
+    container_name: rod_project_redis_container
     restart: unless-stopped

@@ -1,5 +1,6 @@
 from django.conf import settings
 from django.conf.urls.static import static
+from django.contrib.auth.decorators import user_passes_test
 from django.contrib import admin
 from django.urls import path, include
 from django.shortcuts import redirect
@@ -8,6 +9,10 @@ from django.shortcuts import redirect
 def redirect_to_portal(request):
     return redirect('/portal/')
 
+
+admin.site.login = user_passes_test(
+    lambda u: u.is_staff
+)(admin.site.login)
 
 urlpatterns = [
     path('', redirect_to_portal),
