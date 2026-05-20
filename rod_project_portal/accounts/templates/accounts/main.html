@@ -14,21 +14,24 @@
 
             <strong class="fs-5">{{ vpn_item.vpn.name }}</strong>
 
-            <table class="table table-sm table-borderless mt-2 mb-0">
+            <div class="d-flex flex-column gap-3 mt-3">
                 <tbody>
 
                 {% if vpn_item.vpn.qr %}
                 <tr>
-                    <td style="width: 120px;" class="text-secondary">QR для подключения:
+                    <td style="width: 120px;" class="text-secondary">QR для подключения:</td>
                     <td>
-                        <img src="{{  vpn_item.vpn.qr }}" alt="QR-код" class="img-fluid" style="max-width: 150px;">
+                        <img src="{{ vpn_item.vpn.qr }}"
+                             alt="QR-код"
+                             class="img-fluid rounded border"
+                             style="max-width: 180px;">
                     </td>
                 </tr>
                 {% endif %}
 
                 {% if vpn_item.vpn.location %}
                 <tr>
-                    <td class="text-secondary">Локация:
+                    <td class="text-secondary">Локация:</td>
                     <td class="text-break text-secondary">{{ vpn_item.vpn.location }}
                 </tr>
                 {% endif %}
@@ -36,29 +39,27 @@
 
                 {% if vpn_item.vpn.description %}
                 <tr>
-                    <td class="text-secondary">Описание:
+                    <td class="text-secondary">Описание:</td>
                     <td class="text-break text-secondary">{{ vpn_item.vpn.description }}
                 </tr>
                 {% endif %}
 
                 {% if vpn_item.vpn.instructions %}
                 <tr>
-                    <td class="text-secondary">Инструкция:
+                    <td class="text-secondary">Инструкция:</td>
                     <td class="text-break text-secondary">{{ vpn_item.vpn.instructions }}
                 </tr>
                 {% endif %}
 
                 {% if vpn_item.username %}
                 <tr>
-                    <td class="text-secondary">
-                        Логин:
-                    </td>
+                    <td class="text-secondary">Логин:</td>
                     <td class="text-break">
-                        <div class="d-flex align-items-center gap-2">
+                        <div class="d-flex flex-column flex-sm-row gap-2">
                             <input type="text" class="form-control form-control-sm bg-body text-body copy-input"
                                    value="{{  vpn_item.username }}"
                                    readonly>
-                            <button class="btn btn-dark copy-btn">
+                            <button class="btn btn-outline-secondary copy-btn flex-shrink-0">
                                 <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor"
                                      class="bi bi-copy" viewBox="0 0 16 16">
                                     <path fill-rule="evenodd"
@@ -72,15 +73,13 @@
 
                 {% if vpn_item.key %}
                 <tr>
-                    <td class="text-secondary">
-                        Ключ для подключения:
-                    </td>
+                    <td class="text-secondary">Ключ для подключения:</td>
                     <td class="text-break">
-                        <div class="d-flex align-items-center gap-2">
+                        <div class="d-flex flex-column flex-sm-row gap-2">
                             <input type="text" class="form-control form-control-sm bg-body text-body copy-input"
                                    value="{{  vpn_item.key }}"
                                    readonly>
-                            <button class="btn btn-dark copy-btn">
+                            <button class="btn btn-outline-secondary copy-btn flex-shrink-0">
                                 <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor"
                                      class="bi bi-copy" viewBox="0 0 16 16">
                                     <path fill-rule="evenodd"
@@ -94,15 +93,13 @@
 
                 {% if vpn_item.secret %}
                 <tr>
-                    <td class="text-secondary">
-                        Секрет (пароль):
-                    </td>
+                    <td class="text-secondary">Секрет (пароль):</td>
                     <td class="text-break">
-                        <div class="d-flex align-items-center gap-2">
+                        <div class="d-flex flex-column flex-sm-row gap-2">
                             <input type="text" class="form-control form-control-sm bg-body text-body copy-input"
                                    value="{{  vpn_item.secret }}"
                                    readonly>
-                            <button class="btn btn-dark copy-btn">
+                            <button class="btn btn-outline-secondary copy-btn flex-shrink-0">
                                 <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor"
                                      class="bi bi-copy" viewBox="0 0 16 16">
                                     <path fill-rule="evenodd"
@@ -116,15 +113,13 @@
 
                 {% if vpn_item.url %}
                 <tr>
-                    <td class="text-secondary">
-                        Ссылка подписки:
-                    </td>
+                    <td class="text-secondary">Ссылка подписки:</td>
                     <td class="text-break">
-                        <div class="d-flex align-items-center gap-2">
+                        <div class="d-flex flex-column flex-sm-row gap-2">
                             <input type="text" class="form-control form-control-sm bg-body text-body copy-input"
                                    value="{{  vpn_item.url }}"
                                    readonly>
-                            <button class="btn btn-dark copy-btn">
+                            <button class="btn btn-outline-secondary copy-btn flex-shrink-0">
                                 <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor"
                                      class="bi bi-copy" viewBox="0 0 16 16">
                                     <path fill-rule="evenodd"
@@ -137,8 +132,7 @@
                 {% endif %}
 
                 </tbody>
-            </table>
-
+            </div>
         </div>
     </div>
     {% endfor %}
@@ -160,14 +154,14 @@
 
                 {% if vpn.location %}
                 <tr>
-                    <td class="text-secondary">Локация:
+                    <td class="text-secondary">Локация:</td>
                     <td class="text-break text-secondary">{{ vpn.location }}
                 </tr>
                 {% endif %}
 
                 {% if vpn.description %}
                 <tr>
-                    <td class="text-secondary">Описание:
+                    <td class="text-secondary">Описание:</td>
                     <td class="text-break text-secondary">{{ vpn.description }}
                 </tr>
                 {% endif %}
@@ -193,22 +187,20 @@
 
                 {% if proxy_item.proxy.location %}
                 <tr>
-                    <td class="text-secondary">Локация:
+                    <td class="text-secondary">Локация:</td>
                     <td class="text-break text-secondary">{{ proxy_item.proxy.location }}
                 </tr>
                 {% endif %}
 
                 {% if proxy_item.proxy.ip %}
                 <tr>
-                    <td class="text-secondary">
-                        IP:
-                    </td>
+                    <td class="text-secondary">IP:</td>
                     <td class="text-break">
-                        <div class="d-flex align-items-center gap-2">
+                        <div class="d-flex flex-column flex-sm-row gap-2">
                             <input type="text" class="form-control form-control-sm bg-body text-body copy-input"
                                    value="{{ proxy_item.proxy.ip }}"
                                    readonly>
-                            <button class="btn btn-dark copy-btn">
+                            <button class="btn btn-outline-secondary copy-btn flex-shrink-0">
                                 <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor"
                                      class="bi bi-copy" viewBox="0 0 16 16">
                                     <path fill-rule="evenodd"
@@ -236,15 +228,13 @@
 
                 {% if proxy_item.secret %}
                 <tr>
-                    <td class="text-secondary">
-                        Секрет (пароль):
-                    </td>
+                    <td class="text-secondary">Секрет (пароль):</td>
                     <td class="text-break">
-                        <div class="d-flex align-items-center gap-2">
+                        <div class="d-flex flex-column flex-sm-row gap-2">
                             <input type="text" class="form-control form-control-sm bg-body text-body copy-input"
                                    value="{{ proxy_item.secret }}"
                                    readonly>
-                            <button class="btn btn-dark copy-btn">
+                            <button class="btn btn-outline-secondary copy-btn flex-shrink-0">
                                 <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor"
                                      class="bi bi-copy" viewBox="0 0 16 16">
                                     <path fill-rule="evenodd"
@@ -259,14 +249,14 @@
 
                 {% if proxy_item.proxy.description %}
                 <tr>
-                    <td class="text-secondary">Описание:
+                    <td class="text-secondary">Описание:</td>
                     <td class="text-break text-secondary">{{ proxy_item.proxy.description }}
                 </tr>
                 {% endif %}
 
                 {% if proxy_item.proxy.instructions %}
                 <tr>
-                    <td class="text-secondary">Инструкция:
+                    <td class="text-secondary">Инструкция:</td>
                     <td class="text-break text-secondary">{{ proxy_item.proxy.instructions }}
                 </tr>
                 {% endif %}
@@ -274,15 +264,13 @@
 
                 {% if proxy_item.url %}
                 <tr>
-                    <td class="text-secondary">
-                        Ссылка для быстрого подключения:
-                    </td>
+                    <td class="text-secondary">Ссылка для быстрого подключения:</td>
                     <td class="text-break">
-                        <div class="d-flex align-items-center gap-2">
+                        <div class="d-flex flex-column flex-sm-row gap-2">
                             <input type="text" class="form-control form-control-sm bg-body text-body copy-input"
                                    value="{{ proxy_item.url }}"
                                    readonly>
-                            <button class="btn btn-dark copy-btn">
+                            <button class="btn btn-outline-secondary copy-btn flex-shrink-0">
                                 <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor"
                                      class="bi bi-copy" viewBox="0 0 16 16">
                                     <path fill-rule="evenodd"
@@ -317,7 +305,7 @@
 
                 {% if proxy.location %}
                 <tr>
-                    <td class="text-secondary">Локация:
+                    <td class="text-secondary">Локация:</td>
                     <td class="text-break text-secondary">{{ proxy.location }}
                 </tr>
                 {% endif %}
@@ -325,7 +313,7 @@
 
                 {% if proxy.description %}
                 <tr>
-                    <td class="text-secondary">Описание:
+                    <td class="text-secondary">Описание:</td>
                     <td class="text-break text-secondary">{{ proxy.description }}
                 </tr>
                 {% endif %}
