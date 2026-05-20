@@ -13,7 +13,6 @@
         <div class="card-body">
 
             <strong class="fs-5">{{ vpn_item.vpn.name }}</strong>
-
             <table class="table table-sm table-borderless mt-2 mb-0">
                 <tbody>
 
@@ -135,47 +134,45 @@
             </table>
         </div>
     </div>
-</div>
-{% endfor %}
+    {% endfor %}
 
-{% for vpn in available_vpns %}
-<div class="card mb-3 bg-body-tertiary">
-    <div class="card-body">
+    {% for vpn in available_vpns %}
+    <div class="card mb-3 bg-body-tertiary">
+        <div class="card-body">
 
-        <strong class="fs-5">{{ vpn.name }}</strong>
-        <form method="post" action="{% url 'accounts:create_ticket' %}">
-            {% csrf_token %}
-            <input type="hidden" name="service_type" value="vpn">
-            <input type="hidden" name="service_id" value="{{ vpn.id }}">
-            <button type="submit" class="btn btn-primary">Запросить</button>
-        </form>
+            <strong class="fs-5">{{ vpn.name }}</strong>
+            <form method="post" action="{% url 'accounts:create_ticket' %}">
+                {% csrf_token %}
+                <input type="hidden" name="service_type" value="vpn">
+                <input type="hidden" name="service_id" value="{{ vpn.id }}">
+                <button type="submit" class="btn btn-primary">Запросить</button>
+            </form>
 
-        <table class="table table-sm table-borderless mt-2 mb-0">
-            <tbody>
+            <table class="table table-sm table-borderless mt-2 mb-0">
+                <tbody>
 
-            {% if vpn.location %}
-            <tr>
-                <td class="text-secondary">Локация:</td>
-                <td class="text-break text-secondary">{{ vpn.location }}
-            </tr>
-            {% endif %}
+                {% if vpn.location %}
+                <tr>
+                    <td class="text-secondary">Локация:</td>
+                    <td class="text-break text-secondary">{{ vpn.location }}
+                </tr>
+                {% endif %}
 
-            {% if vpn.description %}
-            <tr>
-                <td class="text-secondary">Описание:</td>
-                <td class="text-break text-secondary">{{ vpn.description }}
-            </tr>
-            {% endif %}
+                {% if vpn.description %}
+                <tr>
+                    <td class="text-secondary">Описание:</td>
+                    <td class="text-break text-secondary">{{ vpn.description }}
+                </tr>
+                {% endif %}
 
-            </tbody>
-        </table>
+                </tbody>
+            </table>
 
+        </div>
     </div>
-</div>
-{% endfor %}
+    {% endfor %}
 
 
-<div>
     <h3 class="mb-5 text-primary">Proxy</h3>
 
     {% for proxy_item in user_proxies %}
