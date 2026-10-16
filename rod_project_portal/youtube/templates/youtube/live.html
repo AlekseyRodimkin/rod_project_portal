@@ -1,0 +1,66 @@
+{% extends 'accounts/base.html' %}
+
+{% block title %}
+Youtube Live
+{% endblock %}
+
+{% block body %}
+<div class="mb-5">
+    <main class="container py-2 rounded-4 bg-body-tertiary">
+        <div class="row justify-content-center">
+            <div class="col-12 col-md-8 col-lg-6">
+                <form id="downloadForm" method="POST" class="row g-3">
+                    <div class="col-12">
+                        <label for="url" class="form-label">Ссылка</label>
+                        <div class="input-group">
+                            <input type="text" class="form-control rounded-3" id="url" name="url"
+                                   placeholder="https://youtube.com..." required>
+                            <button class="btn btn-primary rounded-3 mx-1" type="submit" id="submitBtn">Смотреть
+                            </button>
+                        </div>
+                        <div class="invalid-feedback">Пожалуйста, введите ссылку.</div>
+                    </div>
+                </form>
+
+            </div>
+        </div>
+        <div class="row justify-content-center mt-2">
+            <div id="videoBlock" class="col-12 col-md-12 col-lg-10 d-none">
+                <h4 class="mb-3 text-primary text-center">Видео</h4>
+                <div class="card p-0 rounded-4">
+                    <div class="ratio ratio-16x9">
+                        <video id="videoPlayer" class="w-100 rounded-4" controls preload="metadata">
+                            <source id="videoSource" src="" type="video/mp4">
+                            Ваш браузер не поддерживает воспроизведение видео.
+                        </video>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="mt-4 mb-2 p-3 bg-body rounded-4 shadow-sm">
+            <h6>Как смотреть видео?</h6>
+            <p class="text-muted mb-0">
+                Скопируйте ссылку на видео прямо с YouTube (поделиться видео, скопировать) или из браузера
+                (скопировать адрес ссылки)
+            </p>
+
+            <p class="text-muted mb-0">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor"
+                     class="bi bi-exclamation-diamond" viewBox="0 0 16 16">
+                    <path d="M6.95.435c.58-.58 1.52-.58 2.1 0l6.515 6.516c.58.58.58 1.519 0 2.098L9.05 15.565c-.58.58-1.519.58-2.098 0L.435 9.05a1.48 1.48 0 0 1 0-2.098zm1.4.7a.495.495 0 0 0-.7 0L1.134 7.65a.495.495 0 0 0 0 .7l6.516 6.516a.495.495 0 0 0 .7 0l6.516-6.516a.495.495 0 0 0 0-.7L8.35 1.134z"/>
+                    <path d="M7.002 11a1 1 0 1 1 2 0 1 1 0 0 1-2 0M7.1 4.995a.905.905 0 1 1 1.8 0l-.35 3.507a.552.552 0 0 1-1.1 0z"/>
+                </svg>
+                Недоступны видео с пометкой 18+
+                <br>
+                Видео 360, но быстро и без рекламы. Возможны баги с перемоткой, но вы никому не докажете.
+            </p>
+        </div>
+    </main>
+</div>
+
+{% endblock %}
+{% block scripts %}
+<script src="/static/js/notification.js"></script>
+<script src="/static/js/live.js"></script>
+{% endblock %}

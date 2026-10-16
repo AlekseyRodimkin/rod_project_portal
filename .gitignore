@@ -132,3 +132,6 @@ logs/
 TODO.txt
 .DS_Store
 initial_data.json
+
+cert.pem
+key.pem

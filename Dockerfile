@@ -1,4 +1,4 @@
-FROM python:3.13-slim
+FROM python:3.14-slim
 
 ENV PYTHONUNBUFFERED=1 \
     PYTHONDONTWRITEBYTECODE=1
@@ -21,4 +21,6 @@ RUN poetry config virtualenvs.create false \
 
 COPY rod_project_portal .
 
-CMD ["gunicorn", "rod_project_portal.wsgi:application", "--bind", "0.0.0.0:8000"]
+CMD ["uvicorn", "rod_project_portal.asgi:application", \
+     "--host", "0.0.0.0", "--port", "8000", \
+     "--proxy-headers", "--forwarded-allow-ips", "*"]

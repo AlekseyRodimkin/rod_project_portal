@@ -203,7 +203,7 @@ class UserNotification(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
 
     @classmethod
-    def create_with_limit(cls, user, title, message, type, limit=4):
+    def create_with_limit(cls, user, title, message, type, limit=10):
         """Создаёт уведомление и удаляет старые, оставляя только последние limit штук"""
         notification = cls.objects.create(
             user=user,

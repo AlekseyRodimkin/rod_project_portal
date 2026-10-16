@@ -21,13 +21,13 @@ if DEBUG:
 
     REDIS_HOST = "127.0.0.1"
 else:
-    REDIS_HOST = "redis"
+    REDIS_HOST = "portal_redis"
 
 ALLOWED_HOSTS = [
-    "localhost",
-    "0.0.0.0",
-    "127.0.0.1",
-] + os.getenv(
+                    "localhost",
+                    "0.0.0.0",
+                    "127.0.0.1",
+                ] + os.getenv(
     "DJANGO_ALLOWED_HOSTS", ""
 ).split(",")
 
@@ -44,11 +44,14 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'django_ratelimit',
     'accounts.apps.AuthConfig',
+    'youtube.apps.YoutubeConfig',
+    'calls.apps.CallsConfig',
     'widget_tweaks',
 ]
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
+    'whitenoise.middleware.WhiteNoiseMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
@@ -69,12 +72,14 @@ TEMPLATES = [
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
+                "accounts.utils.unread_notifications_count",
+                "accounts.utils.is_superuser",
             ],
         },
     },
 ]
 
-WSGI_APPLICATION = 'rod_project_portal.wsgi.application'
+ASGI_APPLICATION = "rod_project_portal.asgi.application"
 
 db_dir = BASE_DIR / "db"
 db_dir.mkdir(exist_ok=True)
@@ -85,7 +90,6 @@ DATABASES = {
     }
 }
 
-
 CACHES = {
     "default": {
         "BACKEND": "django_redis.cache.RedisCache",
@@ -94,6 +98,15 @@ CACHES = {
             "CLIENT_CLASS": "django_redis.client.DefaultClient",
         },
     }
+}
+
+CHANNEL_LAYERS = {
+    "default": {
+        "BACKEND": "channels_redis.core.RedisChannelLayer",
+        "CONFIG": {
+            "hosts": [(REDIS_HOST, 6379)],
+        },
+    },
 }
 
 AUTH_PASSWORD_VALIDATORS = [
@@ -128,9 +141,29 @@ STATICFILES_DIRS = [
 LOGIN_REDIRECT_URL = reverse_lazy("accounts:main")
 LOGIN_URL = "login/"
 
-# Хранение сессии 8 часов
+# Хранение сессии 24 часов
 # Окончание сессии при закрытии браузера отключено
-SESSION_COOKIE_AGE = 60 * 60 * 8
+SESSION_COOKIE_AGE = 60 * 60 * 24
 SESSION_EXPIRE_AT_BROWSER_CLOSE = False
 
 APPEND_SLASH = True
+
+VAPID_PUBLIC_KEY = os.getenv("VAPID_PUBLIC_KEY")
+VAPID_PRIVATE_KEY = os.getenv("VAPID_PRIVATE_KEY")
+VAPID_SUBJECT = os.getenv("VAPID_SUBJECT")
+
+######## Add in Caddy file ########
+# Rod project portal
+# https://rod-project.24-7.ro {
+#     encode zstd gzip
+#     reverse_proxy rod_project_portal_container:8000
+# }
+
+# SECURE_SSL_REDIRECT не включать
+
+
+if not DEBUG:
+    # Caddy передаёт X-Forwarded-Proto: без этой строки Django считает запросы http
+    SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
+    SESSION_COOKIE_SECURE = True
+    CSRF_COOKIE_SECURE = True

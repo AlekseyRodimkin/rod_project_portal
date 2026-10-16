@@ -91,3 +91,12 @@ env/
 
 # MacOS
 .DS_Store
+.dockerignore
+pyproject.toml
+gen_cert.py
+.gitignore
+.env.template
+gen_vapid_keys.py
+cert.pem
+key.pem
+nginx_commands.py

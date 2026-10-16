@@ -1,17 +1,3 @@
-# docker compose down && docker-compose up -d --build
-# docker compose up -d && docker-compose logs -f
-# sudo scp -i ~/Desktop/vdsina_ssh_key_2 -P 43564 /Users/alex/Desktop/PycharmProjects/rod_project_portal/rod_project_portal/db/db.sqlite3 alex@144.124.229.249:~/projects/rod_project_portal/db
-# scp -i ~/Desktop/vdsina_ssh_key_2 -P 43564 ~/Desktop/public-key.gpg  alex@144.124.229.249:~/projects/rod_project_portal/rp_portal_backup
-
-# docker compose down
-# docker compose up --build -d
-
-# Перезапуск контейнера nginx
-# docker restart remnawave-nginx
-
-# sudo vim /opt/remnawave/nginx.conf
-# /opt/remnawave/docker-compose.yml
-
 """Статика располагается по пути. Нужно прокинуть volume туда из контейнера приложений"""
 # /var/www/html/<domain>/static
 
@@ -42,7 +28,7 @@
 
 """
 HTTPS - вставка в конфигурацию nginx для rod-project.24-7.ro
-sudo vim /opt/remnawave/nginx.conf
+sudo vim .../nginx.conf
 """
 
 # server {

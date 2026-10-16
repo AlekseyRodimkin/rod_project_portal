@@ -30,16 +30,16 @@ class AppLogoutView(LoginRequiredMixin, LogoutView):
     next_page = reverse_lazy("accounts:login")
 
 
-# def redir(request):
-#     return redirect("accounts:main")
-
 class Main(LoginRequiredMixin, TemplateView):
     template_name = "accounts/main.html"
+
+
+class ServicesView(LoginRequiredMixin, TemplateView):
+    template_name = "accounts/services.html"
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         user = self.request.user
-        context["user_is_admin"] = user.is_superuser
 
         # Получаем текущие VPN и Proxy пользователя
         user_vpns = UserVPN.objects.filter(user=user).select_related('vpn')
@@ -61,9 +61,6 @@ class Main(LoginRequiredMixin, TemplateView):
         context["user_proxies"] = user_proxies
         context["available_vpns"] = available_vpns
         context["available_proxies"] = available_proxies
-        context["unread_count"] = UserNotification.objects.filter(
-            user=self.request.user, is_read=False
-        ).count()
 
         return context
 
@@ -95,7 +92,7 @@ def create_ticket(request):
     messages.success(
         request, f"Запрос на подключение отправлен."
     )
-    return redirect('accounts:main')
+    return redirect('accounts:services')
 
 
 class NotificationsView(LoginRequiredMixin, ListView):
@@ -117,6 +114,7 @@ class NotificationsView(LoginRequiredMixin, ListView):
         all_notifications.sort(key=lambda x: x.created_at, reverse=True)
 
         return all_notifications
+
 # class RegisterView(CreateView):
 #     form_class = UserCreationForm
 #     template_name = 'accounts/register.html'
@@ -130,3 +128,7 @@ class NotificationsView(LoginRequiredMixin, ListView):
 #         user = authenticate(self.request, username=username, password=password)
 #         login(request=self.request, user=user)
 #         return response
+
+
+# def redir(request):
+#     return redirect("accounts:main")

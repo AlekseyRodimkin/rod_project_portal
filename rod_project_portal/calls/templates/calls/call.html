@@ -1,0 +1,140 @@
+{% extends 'accounts/base.html' %}
+
+{% block title %}
+Тест звонка
+{% endblock %}
+
+{% block body %}
+<div class="videos d-flex flex-column justify-content-center align-items-center bg-body-secondary rounded-4 overflow-hidden shadow position-relative p-1"
+     style="min-height: 650px;">
+
+    <!-- Адаптивная обертка собеседника -->
+    <div id="remoteWrapper"
+         class="position-relative bg-black rounded-4 overflow-hidden shadow w-100 mb-3 transition-all"
+         style="max-width: 450px; width: 100%; aspect-ratio: 9/16; max-height: 75vh;">
+
+        <!-- Удаленное видео (object-fit: cover заполняет экран без рамок) -->
+        <video id="remote" autoplay playsinline class="w-100 h-100"
+               style="object-fit: cover; background: #000;"></video>
+        <div class="position-absolute top-0 start-0 m-3 px-2 py-1 bg-black bg-opacity-75 text-white rounded small z-2">
+            Собеседник
+        </div>
+
+        <!-- Адаптивное локальное видео (всегда в уголке) -->
+        <div id="localWrapper"
+             class="position-absolute bottom-0 end-0 m-3 shadow-lg rounded-3 overflow-hidden border border-white border-opacity-25 bg-black"
+             style="width: 25%; max-width: 120px; aspect-ratio: 9/16; z-index: 10;">
+            <video id="local" autoplay playsinline muted class="w-100 h-100" style="object-fit: cover;"></video>
+            <div class="position-absolute top-0 start-0 m-1 px-1 bg-black bg-opacity-50 text-white rounded"
+                 style="font-size: 10px;">
+                Вы
+            </div>
+        </div>
+    </div>
+
+    <div id="audioPlaceholder"
+         class="d-none position-absolute top-50 start-50 translate-middle text-center text-white">
+        <div class="fs-1">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" class="bi bi-telephone"
+                 viewBox="0 0 16 16">
+                <path d="M3.654 1.328a.678.678 0 0 0-1.015-.063L1.605 2.3c-.483.484-.661 1.169-.45 1.77a17.6 17.6 0 0 0 4.168 6.608 17.6 17.6 0 0 0 6.608 4.168c.601.211 1.286.033 1.77-.45l1.034-1.034a.678.678 0 0 0-.063-1.015l-2.307-1.794a.68.68 0 0 0-.58-.122l-2.19.547a1.75 1.75 0 0 1-1.657-.459L5.482 8.062a1.75 1.75 0 0 1-.46-1.657l.548-2.19a.68.68 0 0 0-.122-.58zM1.884.511a1.745 1.745 0 0 1 2.612.163L6.29 2.98c.329.423.445.974.315 1.494l-.547 2.19a.68.68 0 0 0 .178.643l2.457 2.457a.68.68 0 0 0 .644.178l2.189-.547a1.75 1.75 0 0 1 1.494.315l2.306 1.794c.829.645.905 1.87.163 2.611l-1.034 1.034c-.74.74-1.846 1.065-2.877.702a18.6 18.6 0 0 1-7.01-4.42 18.6 18.6 0 0 1-4.42-7.009c-.362-1.03-.037-2.137.703-2.877z"/>
+            </svg>
+        </div>
+        <div>Аудиозвонок</div>
+    </div>
+
+    <!-- Панель управления под видео -->
+    <div class="w-100 d-flex justify-content-center mx-auto" style="max-width: 580px;">
+        <div class="card shadow-lg border-0 rounded-pill text-white px-3 py-2 w-100">
+            <div class="d-flex align-items-center justify-content-center justify-content-md-between flex-wrap gap-2 py-1">
+
+                <!-- Статус -->
+                <div>
+                    <span id="status"
+                          class="badge bg-secondary bg-opacity-50 rounded-pill px-3 py-2 text-white fw-normal"
+                          style="font-size: 0.8rem;">Ожидание</span>
+                </div>
+
+                <!-- Кнопки управления и инпут -->
+                <div class="d-flex align-items-center justify-content-center flex-wrap gap-2">
+
+                    <!-- Кнопка включения камеры/микрофона -->
+                    <!--                    <button id="startBtn"-->
+                    <!--                            class="btn btn-primary rounded-circle p-0 d-flex align-items-center justify-content-center shadow-sm text-white"-->
+                    <!--                            style="width: 40px; height: 40px;" title="Включить камеру и микрофон">-->
+                    <!--                        <svg style="pointer-events: none;" xmlns="http://www.w3.org/2000/svg" width="16" height="16"-->
+                    <!--                             fill="currentColor" viewBox="0 0 16 16">-->
+                    <!--                            <path fill-rule="evenodd"-->
+                    <!--                                  d="M0 5a2 2 0 0 1 2-2h7.5a2 2 0 0 1 1.983 1.738l3.11-1.382A1 1 0 0 1 16 4.269v7.462a1 1 0 0 1-1.406.913l-3.111-1.382A2 2 0 0 1 9.5 13H2a2 2 0 0 1-2-2z"/>-->
+                    <!--                        </svg>-->
+                    <!--                    </button>-->
+
+                    <!-- Кнопка выключения/включения микрофона -->
+                    <button id="toggleMicBtn"
+                            class="btn btn-dark rounded-circle p-0 d-flex align-items-center justify-content-center shadow-sm border border-secondary border-opacity-50 text-white"
+                            style="width: 40px; height: 40px;" title="Выключить микрофон" disabled>
+                        <svg style="pointer-events: none;" xmlns="http://www.w3.org/2000/svg" width="16" height="16"
+                             fill="currentColor" viewBox="0 0 16 16">
+                            <path d="M3.5 6.5A.5.5 0 0 1 4 7v1a4 4 0 0 0 8 0V7a.5.5 0 0 1 1 0v1a5 5 0 0 1-4.5 4.975V15h3a.5.5 0 0 1 0 1h-7a.5.5 0 0 1 0-1h3v-2.025A5 5 0 0 1 3 8V7a.5.5 0 0 1 .5-.5z"/>
+                            <path d="M10 8a2 2 0 1 1-4 0V3a2 2 0 1 1 4 0v5z"/>
+                        </svg>
+                    </button>
+
+                    <!-- Кнопка выключения/включения камеры -->
+                    <button id="toggleCamBtn"
+                            class="btn btn-dark rounded-circle p-0 d-flex align-items-center justify-content-center shadow-sm border border-secondary border-opacity-50 text-white"
+                            style="width: 40px; height: 40px;" title="Выключить камеру" disabled>
+                        <svg style="pointer-events: none;" xmlns="http://www.w3.org/2000/svg" width="16" height="16"
+                             fill="currentColor" viewBox="0 0 16 16">
+                            <path fill-rule="evenodd"
+                                  d="M10.961 12.365a2 2 0 0 0 .522-1.103l3.11 1.382A1 1 0 0 0 16 11.731V4.269a1 1 0 0 0-1.406-.913l-3.111 1.382A2 2 0 0 0 9.5 3H4.272zm-10.12-10.7a.5.5 0 0 0-.708.708l14 14a.5.5 0 0 0 .708-.708z"/>
+                        </svg>
+                    </button>
+
+                    <!-- Поле ввода комнаты -->
+
+                    <!-- Поле ввода комнаты больше не нужно пользователю, делаем его скрытым -->
+                    <input id="room" type="hidden" value="{{ room_name }}"
+                           data-contacts-url="{% url 'calls:contacts' %}">
+
+                    <!--                    <div-->
+                    <!--                         class="input-group input-group-sm bg-dark bg-opacity-50 rounded-pill overflow-hidden border border-secondary border-opacity-50"-->
+                    <!--                         style="width: 90px;">-->
+                    <!--                        <input type="text" id="room"-->
+                    <!--                               class="form-control bg-transparent text-white border-0 text-center shadow-none px-1 py-1"-->
+                    <!--                               placeholder="Комната" value="test" style="font-size: 0.8rem;">-->
+                    <!--                    </div>-->
+
+                    <!-- Войти в комнату -->
+                    <!--                    <button id="joinBtn"-->
+                    <!--                            class="btn btn-success rounded-circle p-0 d-flex align-items-center justify-content-center shadow-sm text-white"-->
+                    <!--                            style="width: 40px; height: 40px;" title="Войти" disabled>-->
+                    <!--                        <svg style="pointer-events: none;" xmlns="http://www.w3.org/2000/svg" width="16" height="16"-->
+                    <!--                             fill="currentColor" viewBox="0 0 16 16">-->
+                    <!--                            <path d="M15.854.146a.5.5 0 0 1 .11.54l-5.8 14.5a.5.5 0 0 1-.928.006L6.5 10.38l-4.266-2.733a.5.5 0 0 1 .006-.928L15.314.036a.5.5 0 0 1 .54.11z"/>-->
+                    <!--                        </svg>-->
+                    <!--                    </button>-->
+
+                    <!-- Выйти из комнаты -->
+                    <button id="leaveBtn"
+                            class="btn btn-danger rounded-circle p-0 d-flex align-items-center justify-content-center shadow-sm text-white"
+                            style="width: 40px; height: 40px;" title="Выйти">
+                        <svg style="pointer-events: none;" xmlns="http://www.w3.org/2000/svg" width="16" height="16"
+                             fill="currentColor" viewBox="0 0 16 16" style="transform: rotate(135deg);">
+                            <path fill-rule="evenodd"
+                                  d="M1.885.511a1.745 1.745 0 0 1 2.61.163L6.29 2.98c.329.423.445.974.315 1.494l-.547 2.19a.68.68 0 0 0 .178.643l2.457 2.457a.68.68 0 0 0 .644.178l2.189-.547a1.75 1.75 0 0 1 1.494.315l2.306 1.794c.829.645.905 1.87.163 2.611l-1.034 1.034c-.74.74-1.846 1.065-2.877.702a18.6 18.6 0 0 1-7.01-4.42 18.6 18.6 0 0 1-4.42-7.009c-.362-1.03-.037-2.137.703-2.877z"/>
+                        </svg>
+                    </button>
+
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="/static/js/notification.js"></script>
+<script src="/static/js/calls.js"></script>
+{% endblock %}
