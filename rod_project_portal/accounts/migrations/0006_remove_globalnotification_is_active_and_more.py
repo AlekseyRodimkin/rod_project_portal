@@ -6,17 +6,17 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('accounts', '0005_globalnotification_alter_usertickets_options_and_more'),
+        ("accounts", "0005_globalnotification_alter_usertickets_options_and_more"),
     ]
 
     operations = [
         migrations.RemoveField(
-            model_name='globalnotification',
-            name='is_active',
+            model_name="globalnotification",
+            name="is_active",
         ),
         migrations.AddField(
-            model_name='globalnotification',
-            name='is_read',
+            model_name="globalnotification",
+            name="is_read",
             field=models.BooleanField(default=False),
         ),
     ]

@@ -1,6 +1,11 @@
 from django.urls import path
 from .views import (
-    AppLogoutView, ServicesView, Main, create_ticket, NotificationsView, AppLoginView
+    AppLogoutView,
+    ServicesView,
+    Main,
+    create_ticket,
+    NotificationsView,
+    AppLoginView,
 )
 
 app_name = "accounts"
@@ -14,6 +19,6 @@ urlpatterns = [
     # path("register/", RegisterView.as_view(), name="register"),
     path("", Main.as_view(), name="main"),
     path("services/", ServicesView.as_view(), name="services"),
-    path('create-ticket/', create_ticket, name='create_ticket'),
+    path("create-ticket/", create_ticket, name="create_ticket"),
     path("notifications/", NotificationsView.as_view(), name="notifications"),
 ]

@@ -4,6 +4,7 @@ from django.db import models
 
 class Item(models.Model):
     """Модель товара"""
+
     name = models.CharField(max_length=100, null=False, blank=False)
     location = models.CharField(max_length=100, default=None, null=False, blank=False)
     ip = models.CharField(max_length=30, null=True, blank=True)
@@ -43,6 +44,7 @@ class VPN(Item):
 
 class Proxy(Item):
     """Модель Proxy"""
+
     port = models.CharField(null=True, blank=True)
 
     class Meta:
@@ -56,11 +58,16 @@ class Proxy(Item):
 
 class UserProxy(models.Model):
     """Сводная таблица пользователей и прокси"""
+
     proxy = models.ForeignKey(
-        Proxy, on_delete=models.CASCADE, related_name="proxy_users",
+        Proxy,
+        on_delete=models.CASCADE,
+        related_name="proxy_users",
     )
     user = models.ForeignKey(
-        User, on_delete=models.CASCADE, related_name="user_proxies",
+        User,
+        on_delete=models.CASCADE,
+        related_name="user_proxies",
     )
     username = models.CharField(max_length=150, blank=True, null=True, unique=False)
     key = models.TextField(max_length=500, null=True, blank=True)
@@ -70,19 +77,11 @@ class UserProxy(models.Model):
 
     @property
     def key_short(self) -> str:
-        return (
-            self.key
-            if not self.key or len(self.key) < 28
-            else self.key[:28] + "..."
-        )
+        return self.key if not self.key or len(self.key) < 28 else self.key[:28] + "..."
 
     @property
     def url_short(self) -> str:
-        return (
-            self.url
-            if not self.url or len(self.url) < 28
-            else self.url[:28] + "..."
-        )
+        return self.url if not self.url or len(self.url) < 28 else self.url[:28] + "..."
 
     @property
     def secret_short(self) -> str:
@@ -100,12 +99,13 @@ class UserProxy(models.Model):
 
 class UserVPN(models.Model):
     """Сводная таблица пользователей и VPN"""
+
     vpn = models.ForeignKey(
-        VPN, on_delete=models.CASCADE, related_name="vpn_users",
+        VPN,
+        on_delete=models.CASCADE,
+        related_name="vpn_users",
     )
-    user = models.ForeignKey(
-        User, on_delete=models.CASCADE, related_name="user_vpns"
-    )
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="user_vpns")
     username = models.CharField(max_length=150, blank=True, null=True, unique=False)
     key = models.TextField(max_length=500, null=True, blank=True)
     secret = models.TextField(max_length=500, null=True, blank=True)
@@ -115,19 +115,11 @@ class UserVPN(models.Model):
 
     @property
     def key_short(self) -> str:
-        return (
-            self.key
-            if not self.key or len(self.key) < 28
-            else self.key[:28] + "..."
-        )
+        return self.key if not self.key or len(self.key) < 28 else self.key[:28] + "..."
 
     @property
     def url_short(self) -> str:
-        return (
-            self.url
-            if not self.url or len(self.url) < 28
-            else self.url[:28] + "..."
-        )
+        return self.url if not self.url or len(self.url) < 28 else self.url[:28] + "..."
 
     @property
     def secret_short(self) -> str:
@@ -145,14 +137,23 @@ class UserVPN(models.Model):
 
 class UserTickets(models.Model):
     """Таблица обращений"""
+
     user = models.ForeignKey(
         User, on_delete=models.CASCADE, related_name="user_tickets"
     )
     vpn = models.ForeignKey(
-        VPN, on_delete=models.CASCADE, related_name="user_vpn_tickets", null=True, blank=True
+        VPN,
+        on_delete=models.CASCADE,
+        related_name="user_vpn_tickets",
+        null=True,
+        blank=True,
     )
     proxy = models.ForeignKey(
-        Proxy, on_delete=models.CASCADE, related_name="user_proxy_tickets", null=True, blank=True
+        Proxy,
+        on_delete=models.CASCADE,
+        related_name="user_proxy_tickets",
+        null=True,
+        blank=True,
     )
     created_at = models.DateTimeField(auto_now_add=True)
 
@@ -166,10 +167,10 @@ class GlobalNotification(models.Model):
     """Общее уведомление для всех пользователей"""
 
     class Type(models.TextChoices):
-        INFO = 'info', 'Информация'
-        SUCCESS = 'success', 'Успех'
-        WARNING = 'warning', 'Предупреждение'
-        DANGER = 'danger', 'Ошибка'
+        INFO = "info", "Информация"
+        SUCCESS = "success", "Успех"
+        WARNING = "warning", "Предупреждение"
+        DANGER = "danger", "Ошибка"
 
     title = models.CharField(max_length=200)
     message = models.TextField()
@@ -190,12 +191,14 @@ class UserNotification(models.Model):
     """Персональное уведомление"""
 
     class Type(models.TextChoices):
-        INFO = 'info', 'Информация'
-        SUCCESS = 'success', 'Успех'
-        WARNING = 'warning', 'Предупреждение'
-        DANGER = 'danger', 'Ошибка'
+        INFO = "info", "Информация"
+        SUCCESS = "success", "Успех"
+        WARNING = "warning", "Предупреждение"
+        DANGER = "danger", "Ошибка"
 
-    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="notifications")
+    user = models.ForeignKey(
+        User, on_delete=models.CASCADE, related_name="notifications"
+    )
     title = models.CharField(max_length=200)
     message = models.TextField()
     type = models.CharField(max_length=20, choices=Type.choices, default=Type.INFO)
@@ -206,14 +209,14 @@ class UserNotification(models.Model):
     def create_with_limit(cls, user, title, message, type, limit=10):
         """Создаёт уведомление и удаляет старые, оставляя только последние limit штук"""
         notification = cls.objects.create(
-            user=user,
-            title=title,
-            message=message,
-            type=type
+            user=user, title=title, message=message, type=type
         )
 
-        old_notifications_ids = cls.objects.filter(user=user).order_by('-created_at').values_list('id', flat=True)[
-            limit:]
+        old_notifications_ids = (
+            cls.objects.filter(user=user)
+            .order_by("-created_at")
+            .values_list("id", flat=True)[limit:]
+        )
         if old_notifications_ids:
             cls.objects.filter(id__in=old_notifications_ids).delete()
 

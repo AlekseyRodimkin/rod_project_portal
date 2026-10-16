@@ -24,27 +24,27 @@ from .models import Friendship, CallHistory, PushSubscription
 
 @admin.register(Friendship)
 class FriendshipAdmin(admin.ModelAdmin):
-    list_display = ('from_user', 'to_user', 'status', 'created_at')
-    list_filter = ('status', 'created_at')
-    search_fields = ('from_user__username', 'to_user__username')
+    list_display = ("from_user", "to_user", "status", "created_at")
+    list_filter = ("status", "created_at")
+    search_fields = ("from_user__username", "to_user__username")
     list_per_page = 25
 
 
 @admin.register(CallHistory)
 class CallHistoryAdmin(admin.ModelAdmin):
-    list_display = ('caller', 'callee', 'room_name', 'status', 'start_time', 'end_time')
-    list_filter = ('status', 'start_time')
-    search_fields = ('caller__username', 'callee__username', 'room_name')
+    list_display = ("caller", "callee", "room_name", "status", "start_time", "end_time")
+    list_filter = ("status", "start_time")
+    search_fields = ("caller__username", "callee__username", "room_name")
     list_per_page = 25
 
 
 @admin.register(PushSubscription)
 class PushSubscriptionAdmin(admin.ModelAdmin):
-    list_display = ('user', 'short_endpoint', 'created_at')
-    list_filter = ('created_at',)
-    search_fields = ('user__username', 'endpoint')
-    readonly_fields = ('endpoint', 'p256dh', 'auth', 'created_at')
+    list_display = ("user", "short_endpoint", "created_at")
+    list_filter = ("created_at",)
+    search_fields = ("user__username", "endpoint")
+    readonly_fields = ("endpoint", "p256dh", "auth", "created_at")
 
-    @admin.display(description='Адрес подписки')
+    @admin.display(description="Адрес подписки")
     def short_endpoint(self, obj):
-        return obj.endpoint[:60] + '…'
+        return obj.endpoint[:60] + "…"

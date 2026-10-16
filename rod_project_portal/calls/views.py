@@ -41,7 +41,7 @@ class CallView(LoginRequiredMixin, TemplateView):
             caller=user,
             callee=callee,
             room_name=room_name,
-            status=CallHistory.CallStatus.COMPLETED
+            status=CallHistory.CallStatus.COMPLETED,
         )
 
         return context
@@ -53,13 +53,14 @@ class ContactsView(LoginRequiredMixin, TemplateView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         user = self.request.user
-        context['vapid_public_key'] = settings.VAPID_PUBLIC_KEY
+        context["vapid_public_key"] = settings.VAPID_PUBLIC_KEY
 
         # Поиск пользователей
-        search_query = self.request.GET.get('q', '').strip()
+        search_query = self.request.GET.get("q", "").strip()
         search_results = []
-        if search_query and len(search_query) >= 2: \
-                # Ищем пользователей, исключая самого себя
+        if (
+            search_query and len(search_query) >= 2
+        ):  # Ищем пользователей, исключая самого себя
             search_results = User.objects.filter(
                 username__icontains=search_query
             ).exclude(id=user.id)[:5]
@@ -67,43 +68,42 @@ class ContactsView(LoginRequiredMixin, TemplateView):
         # Получаем список друзей (где текущий пользователь либо from_user, либо to_user со статусом 'accepted')
         friendships = Friendship.objects.filter(
             (Q(from_user=user) | Q(to_user=user)) & Q(status=Friendship.Status.ACCEPTED)
-        ).select_related('from_user', 'to_user')
+        ).select_related("from_user", "to_user")
 
         friends = []
         for f in friendships:
             friend = f.to_user if f.from_user == user else f.from_user
-            friends.append({
-                'user': friend,
-                'room_name': f.room_name
-            })
+            friends.append({"user": friend, "room_name": f.room_name})
 
         # История звонков для текущего пользователя
         call_history = CallHistory.objects.filter(
             Q(caller=user) | Q(callee=user)
-        ).select_related('caller', 'callee')[:5]
+        ).select_related("caller", "callee")[:5]
 
-        context['search_query'] = search_query
-        context['search_results'] = search_results
-        context['friends'] = friends
-        context['call_history'] = call_history
+        context["search_query"] = search_query
+        context["search_results"] = search_results
+        context["friends"] = friends
+        context["call_history"] = call_history
         return context
 
     def post(self, request, *args, **kwargs):
         """Обработка добавления в друзья"""
         user = request.user
-        action = request.POST.get('action')
-        target_user_id = request.POST.get('user_id')
+        action = request.POST.get("action")
+        target_user_id = request.POST.get("user_id")
         target_user = User.objects.get(id=target_user_id)
 
         # Добавляем в друзья
-        if action == 'add_friend' and target_user_id:
+        if action == "add_friend" and target_user_id:
             target_user = get_object_or_404(User, id=target_user_id)
             if target_user != user:
                 # Проверяем, существует ли уже связь
                 friendship, created = Friendship.objects.get_or_create(
                     from_user=user,
                     to_user=target_user,
-                    defaults={'status': Friendship.Status.ACCEPTED}  # Сразу добавляем в друзья
+                    defaults={
+                        "status": Friendship.Status.ACCEPTED
+                    },  # Сразу добавляем в друзья
                 )
                 if not created and friendship.status != Friendship.Status.ACCEPTED:
                     friendship.status = Friendship.Status.ACCEPTED
@@ -114,14 +114,12 @@ class ContactsView(LoginRequiredMixin, TemplateView):
             user=target_user,
             title=f"Вас добавили в друзья",
             message=f"Пользователь {user.username} добавил вас в друзья",
-            type=UserNotification.Type.INFO
+            type=UserNotification.Type.INFO,
         )
 
         # Создаем Всплывающее уведомление об успешном добавлении
-        messages.success(
-            request, f"{target_user.get_username()} добавлен(а) в друзья"
-        )
-        return redirect('calls:contacts')
+        messages.success(request, f"{target_user.get_username()} добавлен(а) в друзья")
+        return redirect("calls:contacts")
 
 
 # @login_required

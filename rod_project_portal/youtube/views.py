@@ -56,18 +56,20 @@ class GetLivePlayUrlView(View):
                     "error_type": 404,
                     "error_message": "Не удалось получить поток",
                 },
-                status=404
+                status=404,
             )
 
         file_size, supports_range = await fetch_video_metadata(stream_url)
         content_type = "video/mp4"
 
-        return JsonResponse({
-            "stream_url": stream_url,
-            "content_type": content_type,
-            "supports_range": supports_range,
-            "file_size": file_size,
-        })
+        return JsonResponse(
+            {
+                "stream_url": stream_url,
+                "content_type": content_type,
+                "supports_range": supports_range,
+                "file_size": file_size,
+            }
+        )
 
 
 class StreamVideoView(View):
@@ -105,7 +107,10 @@ class StreamVideoView(View):
 
         response = StreamingHttpResponse(
             stream_generator(
-                start=start, end=end, supports_range=supports_range, stream_url=stream_url
+                start=start,
+                end=end,
+                supports_range=supports_range,
+                stream_url=stream_url,
             ),
             status=status_code,
             content_type="video/mp4",

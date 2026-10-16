@@ -8,46 +8,97 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('accounts', '0004_alter_uservpn_url'),
+        ("accounts", "0004_alter_uservpn_url"),
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
     ]
 
     operations = [
         migrations.CreateModel(
-            name='GlobalNotification',
+            name="GlobalNotification",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('title', models.CharField(max_length=200)),
-                ('message', models.TextField()),
-                ('type', models.CharField(choices=[('info', 'Информация'), ('success', 'Успех'), ('warning', 'Предупреждение'), ('error', 'Ошибка')], default='info', max_length=20)),
-                ('is_active', models.BooleanField(default=True)),
-                ('created_at', models.DateTimeField(auto_now_add=True)),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("title", models.CharField(max_length=200)),
+                ("message", models.TextField()),
+                (
+                    "type",
+                    models.CharField(
+                        choices=[
+                            ("info", "Информация"),
+                            ("success", "Успех"),
+                            ("warning", "Предупреждение"),
+                            ("error", "Ошибка"),
+                        ],
+                        default="info",
+                        max_length=20,
+                    ),
+                ),
+                ("is_active", models.BooleanField(default=True)),
+                ("created_at", models.DateTimeField(auto_now_add=True)),
             ],
             options={
-                'verbose_name': 'Общее уведомление',
-                'verbose_name_plural': 'Общие уведомления',
-                'ordering': ['-created_at'],
+                "verbose_name": "Общее уведомление",
+                "verbose_name_plural": "Общие уведомления",
+                "ordering": ["-created_at"],
             },
         ),
         migrations.AlterModelOptions(
-            name='usertickets',
-            options={'ordering': ['-created_at'], 'verbose_name': 'Обращение', 'verbose_name_plural': 'Обращения'},
+            name="usertickets",
+            options={
+                "ordering": ["-created_at"],
+                "verbose_name": "Обращение",
+                "verbose_name_plural": "Обращения",
+            },
         ),
         migrations.CreateModel(
-            name='UserNotification',
+            name="UserNotification",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('title', models.CharField(max_length=200)),
-                ('message', models.TextField()),
-                ('type', models.CharField(choices=[('info', 'Информация'), ('success', 'Успех'), ('warning', 'Предупреждение'), ('error', 'Ошибка')], default='info', max_length=20)),
-                ('is_read', models.BooleanField(default=False)),
-                ('created_at', models.DateTimeField(auto_now_add=True)),
-                ('user', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='notifications', to=settings.AUTH_USER_MODEL)),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("title", models.CharField(max_length=200)),
+                ("message", models.TextField()),
+                (
+                    "type",
+                    models.CharField(
+                        choices=[
+                            ("info", "Информация"),
+                            ("success", "Успех"),
+                            ("warning", "Предупреждение"),
+                            ("error", "Ошибка"),
+                        ],
+                        default="info",
+                        max_length=20,
+                    ),
+                ),
+                ("is_read", models.BooleanField(default=False)),
+                ("created_at", models.DateTimeField(auto_now_add=True)),
+                (
+                    "user",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name="notifications",
+                        to=settings.AUTH_USER_MODEL,
+                    ),
+                ),
             ],
             options={
-                'verbose_name': 'Персональное уведомление',
-                'verbose_name_plural': 'Персональные уведомления',
-                'ordering': ['-created_at'],
+                "verbose_name": "Персональное уведомление",
+                "verbose_name_plural": "Персональные уведомления",
+                "ordering": ["-created_at"],
             },
         ),
     ]

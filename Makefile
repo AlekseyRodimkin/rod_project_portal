@@ -24,3 +24,6 @@ static:
 
 dev_start:
 	poetry run python -m uvicorn rod_project_portal.asgi:application --host 0.0.0.0 --port 8443 --ssl-keyfile key.pem --ssl-certfile cert.pem --app-dir rod_project_portal
+
+black:
+	poetry run black .

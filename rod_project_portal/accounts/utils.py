@@ -34,9 +34,9 @@ def service_worker(request):
     JavaScript с заголовком Cache-Control: no-cache, чтобы браузер при каждой
     проверке брал свежую версию. Если файла нет — ответ 404.
     """
-    path = finders.find('js/sw.js')  # ищет файл в ваших static-папках
+    path = finders.find("js/sw.js")  # ищет файл в ваших static-папках
     if not path:
         raise Http404("sw.js не найден")
-    response = FileResponse(open(path, 'rb'), content_type='application/javascript')
-    response['Cache-Control'] = 'no-cache'  # чтобы обновления подхватывались сразу
+    response = FileResponse(open(path, "rb"), content_type="application/javascript")
+    response["Cache-Control"] = "no-cache"  # чтобы обновления подхватывались сразу
     return response

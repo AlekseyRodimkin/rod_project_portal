@@ -29,6 +29,7 @@ gen_vapid_keys.py — одноразовая генерация пары VAPID-�
     - Приватный ключ никому не показывайте и не коммитьте в git.
     - Сам скрипт ничего не сохраняет в файлы, только печатает на экран.
 """
+
 import base64
 
 from cryptography.hazmat.primitives import serialization

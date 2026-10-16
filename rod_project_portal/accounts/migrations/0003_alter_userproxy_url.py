@@ -6,13 +6,13 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('accounts', '0002_remove_vpn_qr_uservpn_qr_url'),
+        ("accounts", "0002_remove_vpn_qr_uservpn_qr_url"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='userproxy',
-            name='url',
+            model_name="userproxy",
+            name="url",
             field=models.CharField(blank=True, null=True),
         ),
     ]

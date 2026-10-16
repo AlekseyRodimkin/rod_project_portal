@@ -9,15 +9,15 @@ from accounts.utils import service_worker
 
 
 def redirect_to_portal(request):
-    return redirect('/portal/')
+    return redirect("/portal/")
 
 
 urlpatterns = [
-    path('', redirect_to_portal),
-    path('portal/admin/', admin.site.urls),
-    path('portal/', include('accounts.urls')),
-    path('portal/', include('youtube.urls')),
-    path('portal/', include('calls.urls')),
+    path("", redirect_to_portal),
+    path("portal/admin/", admin.site.urls),
+    path("portal/", include("accounts.urls")),
+    path("portal/", include("youtube.urls")),
+    path("portal/", include("calls.urls")),
     # path('sw.js', service_worker),
     # path('push/subscribe/', push_subscribe),
 ]

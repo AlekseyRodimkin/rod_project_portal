@@ -15,36 +15,135 @@ class Migration(migrations.Migration):
 
     operations = [
         migrations.CreateModel(
-            name='CallHistory',
+            name="CallHistory",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('room_name', models.CharField(blank=True, max_length=100, verbose_name='Название комнаты')),
-                ('start_time', models.DateTimeField(auto_now_add=True, verbose_name='Время начала')),
-                ('end_time', models.DateTimeField(blank=True, null=True, verbose_name='Время окончания')),
-                ('status', models.CharField(choices=[('completed', 'Завершен'), ('missed', 'Пропущен'), ('cancelled', 'Отменен')], default='completed', max_length=20, verbose_name='Статус звонка')),
-                ('callee', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='calls_received', to=settings.AUTH_USER_MODEL, verbose_name='Кому звонили')),
-                ('caller', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='calls_initiated', to=settings.AUTH_USER_MODEL, verbose_name='Кто звонил')),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                (
+                    "room_name",
+                    models.CharField(
+                        blank=True, max_length=100, verbose_name="Название комнаты"
+                    ),
+                ),
+                (
+                    "start_time",
+                    models.DateTimeField(
+                        auto_now_add=True, verbose_name="Время начала"
+                    ),
+                ),
+                (
+                    "end_time",
+                    models.DateTimeField(
+                        blank=True, null=True, verbose_name="Время окончания"
+                    ),
+                ),
+                (
+                    "status",
+                    models.CharField(
+                        choices=[
+                            ("completed", "Завершен"),
+                            ("missed", "Пропущен"),
+                            ("cancelled", "Отменен"),
+                        ],
+                        default="completed",
+                        max_length=20,
+                        verbose_name="Статус звонка",
+                    ),
+                ),
+                (
+                    "callee",
+                    models.ForeignKey(
+                        blank=True,
+                        null=True,
+                        on_delete=django.db.models.deletion.SET_NULL,
+                        related_name="calls_received",
+                        to=settings.AUTH_USER_MODEL,
+                        verbose_name="Кому звонили",
+                    ),
+                ),
+                (
+                    "caller",
+                    models.ForeignKey(
+                        blank=True,
+                        null=True,
+                        on_delete=django.db.models.deletion.SET_NULL,
+                        related_name="calls_initiated",
+                        to=settings.AUTH_USER_MODEL,
+                        verbose_name="Кто звонил",
+                    ),
+                ),
             ],
             options={
-                'verbose_name': 'История звонка',
-                'verbose_name_plural': 'История звонков',
-                'ordering': ['-start_time'],
+                "verbose_name": "История звонка",
+                "verbose_name_plural": "История звонков",
+                "ordering": ["-start_time"],
             },
         ),
         migrations.CreateModel(
-            name='Friendship',
+            name="Friendship",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('status', models.CharField(choices=[('pending', 'В ожидании'), ('accepted', 'Друзья'), ('blocked', 'Заблокирован')], default='pending', max_length=20, verbose_name='Статус')),
-                ('created_at', models.DateTimeField(auto_now_add=True, verbose_name='Дата создания')),
-                ('updated_at', models.DateTimeField(auto_now=True, verbose_name='Дата обновления')),
-                ('from_user', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='friendship_requests_sent', to=settings.AUTH_USER_MODEL, verbose_name='Инициатор')),
-                ('to_user', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='friendship_requests_received', to=settings.AUTH_USER_MODEL, verbose_name='Получатель')),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                (
+                    "status",
+                    models.CharField(
+                        choices=[
+                            ("pending", "В ожидании"),
+                            ("accepted", "Друзья"),
+                            ("blocked", "Заблокирован"),
+                        ],
+                        default="pending",
+                        max_length=20,
+                        verbose_name="Статус",
+                    ),
+                ),
+                (
+                    "created_at",
+                    models.DateTimeField(
+                        auto_now_add=True, verbose_name="Дата создания"
+                    ),
+                ),
+                (
+                    "updated_at",
+                    models.DateTimeField(auto_now=True, verbose_name="Дата обновления"),
+                ),
+                (
+                    "from_user",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name="friendship_requests_sent",
+                        to=settings.AUTH_USER_MODEL,
+                        verbose_name="Инициатор",
+                    ),
+                ),
+                (
+                    "to_user",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name="friendship_requests_received",
+                        to=settings.AUTH_USER_MODEL,
+                        verbose_name="Получатель",
+                    ),
+                ),
             ],
             options={
-                'verbose_name': 'Дружба / Заявка',
-                'verbose_name_plural': 'Список друзей и заявок',
-                'unique_together': {('from_user', 'to_user')},
+                "verbose_name": "Дружба / Заявка",
+                "verbose_name_plural": "Список друзей и заявок",
+                "unique_together": {("from_user", "to_user")},
             },
         ),
     ]

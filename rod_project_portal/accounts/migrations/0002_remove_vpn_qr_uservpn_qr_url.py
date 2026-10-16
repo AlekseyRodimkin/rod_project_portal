@@ -6,17 +6,17 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('accounts', '0001_initial'),
+        ("accounts", "0001_initial"),
     ]
 
     operations = [
         migrations.RemoveField(
-            model_name='vpn',
-            name='qr',
+            model_name="vpn",
+            name="qr",
         ),
         migrations.AddField(
-            model_name='uservpn',
-            name='qr_url',
+            model_name="uservpn",
+            name="qr_url",
             field=models.URLField(blank=True, null=True),
         ),
     ]

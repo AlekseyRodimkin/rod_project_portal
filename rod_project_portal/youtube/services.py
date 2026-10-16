@@ -45,15 +45,12 @@ async def get_stream_url(url: str) -> str | None:
         "geo_bypass": True,
         "age_limit": 18,
         "extractor_args": {
-            "youtube": {
-                "player_client": ["android", "web"],
-                "skip": ["dash", "hls"]
-            }
+            "youtube": {"player_client": ["android", "web"], "skip": ["dash", "hls"]}
         },
         "allow_multiple_video_streams": True,
         "allow_multiple_audio_streams": True,
     }
-    # yt_dlp блокирующий, поэтому в async функции его лучше вызывать через sync_to_async, 
+    # yt_dlp блокирующий, поэтому в async функции его лучше вызывать через sync_to_async,
     # либо оставить так, если у вас ASGI сервер (Uvicorn/Daphne) запускает sync блоки в пул потоков.
     from asgiref.sync import sync_to_async
 

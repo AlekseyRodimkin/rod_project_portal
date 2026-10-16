@@ -16,11 +16,11 @@ import calls.routing  # роутинг внутри приложения
 
 os.environ.setdefault("DJANGO_SETTINGS_MODULE", "rod_project_portal.settings")
 
-application = ProtocolTypeRouter({
-    "http": get_asgi_application(),
-    "websocket": AllowedHostsOriginValidator(
-        AuthMiddlewareStack(
-            URLRouter(calls.routing.websocket_urlpatterns)
-        )
-    ),
-})
+application = ProtocolTypeRouter(
+    {
+        "http": get_asgi_application(),
+        "websocket": AllowedHostsOriginValidator(
+            AuthMiddlewareStack(URLRouter(calls.routing.websocket_urlpatterns))
+        ),
+    }
+)

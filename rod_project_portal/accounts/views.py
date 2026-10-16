@@ -8,17 +8,19 @@ from django.views.generic import TemplateView, ListView
 from django.utils.decorators import method_decorator
 from django_ratelimit.decorators import ratelimit
 
-from .models import UserProxy, UserVPN, VPN, Proxy, UserTickets, UserNotification, GlobalNotification
+from .models import (
+    UserProxy,
+    UserVPN,
+    VPN,
+    Proxy,
+    UserTickets,
+    UserNotification,
+    GlobalNotification,
+)
 
 
 @method_decorator(
-    ratelimit(
-        key='ip',
-        rate='5/10m',
-        method='POST',
-        block=True
-    ),
-    name='dispatch'
+    ratelimit(key="ip", rate="5/10m", method="POST", block=True), name="dispatch"
 )
 class AppLoginView(LoginView):
     template_name = "accounts/login.html"
@@ -42,16 +44,16 @@ class ServicesView(LoginRequiredMixin, TemplateView):
         user = self.request.user
 
         # Получаем текущие VPN и Proxy пользователя
-        user_vpns = UserVPN.objects.filter(user=user).select_related('vpn')
-        user_proxies = UserProxy.objects.filter(user=user).select_related('proxy')
+        user_vpns = UserVPN.objects.filter(user=user).select_related("vpn")
+        user_proxies = UserProxy.objects.filter(user=user).select_related("proxy")
 
         # Получаем ID тех, что уже есть у пользователя
-        user_vpn_ids = user_vpns.values_list('vpn_id', flat=True)
-        user_proxy_ids = user_proxies.values_list('proxy_id', flat=True)
+        user_vpn_ids = user_vpns.values_list("vpn_id", flat=True)
+        user_proxy_ids = user_proxies.values_list("proxy_id", flat=True)
 
         # Все доступные VPN и Proxy
-        all_vpns = VPN.objects.all().order_by('created_at')
-        all_proxies = Proxy.objects.all().order_by('created_at')
+        all_vpns = VPN.objects.all().order_by("created_at")
+        all_proxies = Proxy.objects.all().order_by("created_at")
 
         # Те, которых нет у пользователя
         available_vpns = all_vpns.exclude(id__in=user_vpn_ids)
@@ -67,15 +69,15 @@ class ServicesView(LoginRequiredMixin, TemplateView):
 
 @login_required
 def create_ticket(request):
-    if request.method == 'POST':
-        service_type = request.POST.get('service_type')
-        service_id = request.POST.get('service_id')
+    if request.method == "POST":
+        service_type = request.POST.get("service_type")
+        service_id = request.POST.get("service_id")
         ticket = UserTickets(user=request.user)
 
-        if service_type == 'vpn':
+        if service_type == "vpn":
             ticket.vpn = VPN.objects.get(id=service_id)
             notif = VPN.objects.get(id=service_id).name
-        elif service_type == 'proxy':
+        elif service_type == "proxy":
             ticket.proxy = Proxy.objects.get(id=service_id)
             notif = Proxy.objects.get(id=service_id).name
 
@@ -86,13 +88,11 @@ def create_ticket(request):
             user=request.user,
             title="Заявка отправлена",
             message=f"Ваша заявка на '{notif}' отправлена",
-            type=UserNotification.Type.SUCCESS
+            type=UserNotification.Type.SUCCESS,
         )
 
-    messages.success(
-        request, f"Запрос на подключение отправлен."
-    )
-    return redirect('accounts:services')
+    messages.success(request, f"Запрос на подключение отправлен.")
+    return redirect("accounts:services")
 
 
 class NotificationsView(LoginRequiredMixin, ListView):
@@ -114,6 +114,7 @@ class NotificationsView(LoginRequiredMixin, ListView):
         all_notifications.sort(key=lambda x: x.created_at, reverse=True)
 
         return all_notifications
+
 
 # class RegisterView(CreateView):
 #     form_class = UserCreationForm

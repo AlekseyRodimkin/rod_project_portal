@@ -6,13 +6,13 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('accounts', '0003_alter_userproxy_url'),
+        ("accounts", "0003_alter_userproxy_url"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='uservpn',
-            name='url',
+            model_name="uservpn",
+            name="url",
             field=models.CharField(blank=True, null=True),
         ),
     ]

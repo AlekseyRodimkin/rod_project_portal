@@ -6,13 +6,22 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('accounts', '0007_remove_globalnotification_is_read_and_more'),
+        ("accounts", "0007_remove_globalnotification_is_read_and_more"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='usernotification',
-            name='type',
-            field=models.CharField(choices=[('info', 'Информация'), ('success', 'Успех'), ('warning', 'Предупреждение'), ('danger', 'Ошибка')], default='info', max_length=20),
+            model_name="usernotification",
+            name="type",
+            field=models.CharField(
+                choices=[
+                    ("info", "Информация"),
+                    ("success", "Успех"),
+                    ("warning", "Предупреждение"),
+                    ("danger", "Ошибка"),
+                ],
+                default="info",
+                max_length=20,
+            ),
         ),
     ]

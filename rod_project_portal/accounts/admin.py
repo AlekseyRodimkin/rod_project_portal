@@ -1,7 +1,15 @@
 from django import forms
 from django.contrib import admin
 
-from .models import Proxy, VPN, UserProxy, UserVPN, UserTickets, GlobalNotification, UserNotification
+from .models import (
+    Proxy,
+    VPN,
+    UserProxy,
+    UserVPN,
+    UserTickets,
+    GlobalNotification,
+    UserNotification,
+)
 
 """
 Опции административной панели
@@ -44,7 +52,11 @@ class VPNAdmin(admin.ModelAdmin):
         "pk",
         "name",
     )
-    list_filter = ["created_at", "location", "ip", ]
+    list_filter = [
+        "created_at",
+        "location",
+        "ip",
+    ]
     readonly_fields = ["created_at"]
     search_fields = (
         "name",
@@ -77,7 +89,11 @@ class ProxyAdmin(admin.ModelAdmin):
         "pk",
         "name",
     )
-    list_filter = ["created_at", "location", "ip", ]
+    list_filter = [
+        "created_at",
+        "location",
+        "ip",
+    ]
     readonly_fields = ["created_at"]
     search_fields = (
         "name",
@@ -105,9 +121,7 @@ class UserProxyAdmin(admin.ModelAdmin):
         "pk",
         "proxy",
     )
-    ordering = (
-        "pk",
-    )
+    ordering = ("pk",)
     list_filter = ["created_at", "user"]
     readonly_fields = ["created_at"]
     list_per_page = 25
@@ -130,9 +144,7 @@ class UserVPNAdmin(admin.ModelAdmin):
         "pk",
         "vpn",
     )
-    ordering = (
-        "pk",
-    )
+    ordering = ("pk",)
     list_filter = ["created_at", "user"]
     readonly_fields = ["created_at"]
     list_per_page = 25
@@ -151,9 +163,7 @@ class UserTicketsAdmin(admin.ModelAdmin):
         "pk",
         "user",
     )
-    ordering = (
-        "created_at",
-    )
+    ordering = ("created_at",)
     list_filter = ["created_at", "user"]
     readonly_fields = ["created_at"]
     list_per_page = 25
@@ -161,13 +171,7 @@ class UserTicketsAdmin(admin.ModelAdmin):
 
 @admin.register(GlobalNotification)
 class GlobalNotificationAdmin(admin.ModelAdmin):
-    list_display = (
-        "pk",
-        "title",
-        "type",
-        "is_active",
-        "created_at"
-    )
+    list_display = ("pk", "title", "type", "is_active", "created_at")
     list_display_links = (
         "pk",
         "title",
@@ -180,14 +184,7 @@ class GlobalNotificationAdmin(admin.ModelAdmin):
 
 @admin.register(UserNotification)
 class UserNotificationAdmin(admin.ModelAdmin):
-    list_display = (
-        "pk",
-        "user",
-        "title",
-        "type",
-        "is_read",
-        "created_at"
-    )
+    list_display = ("pk", "user", "title", "type", "is_read", "created_at")
     list_display_links = (
         "pk",
         "user",

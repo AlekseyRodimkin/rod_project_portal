@@ -41,20 +41,24 @@ cert = (
     .not_valid_before(now - datetime.timedelta(days=1))
     .not_valid_after(now + datetime.timedelta(days=365))
     .add_extension(
-        x509.SubjectAlternativeName([
-            x509.DNSName("localhost"),
-            x509.IPAddress(ipaddress.ip_address("127.0.0.1")),
-            x509.IPAddress(ipaddress.ip_address(ip)),
-        ]),
+        x509.SubjectAlternativeName(
+            [
+                x509.DNSName("localhost"),
+                x509.IPAddress(ipaddress.ip_address("127.0.0.1")),
+                x509.IPAddress(ipaddress.ip_address(ip)),
+            ]
+        ),
         critical=False,
     )
     .sign(key, hashes.SHA256())
 )
 
-KEY.write_bytes(key.private_bytes(
-    serialization.Encoding.PEM,
-    serialization.PrivateFormat.TraditionalOpenSSL,
-    serialization.NoEncryption(),
-))
+KEY.write_bytes(
+    key.private_bytes(
+        serialization.Encoding.PEM,
+        serialization.PrivateFormat.TraditionalOpenSSL,
+        serialization.NoEncryption(),
+    )
+)
 CERT.write_bytes(cert.public_bytes(serialization.Encoding.PEM))
 print("Готово! Файлы cert.pem и key.pem созданы.")
