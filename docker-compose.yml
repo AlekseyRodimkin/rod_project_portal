@@ -13,7 +13,7 @@ services:
              --proxy-headers --forwarded-allow-ips '*'"
     ports:
       #      - "8000:8000"
-      - "127.0.0.1:8001:8000"
+      - "127.0.0.1:8005:8000"
     volumes:
       - ./db:/app/db
     depends_on:
