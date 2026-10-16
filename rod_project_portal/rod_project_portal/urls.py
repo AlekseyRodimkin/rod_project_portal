@@ -4,7 +4,7 @@ from django.contrib import admin
 from django.urls import path, include
 from django.shortcuts import redirect
 from django.contrib.staticfiles.urls import staticfiles_urlpatterns
-from calls.views import push_subscribe
+# from calls.views import push_subscribe
 from accounts.utils import service_worker
 
 

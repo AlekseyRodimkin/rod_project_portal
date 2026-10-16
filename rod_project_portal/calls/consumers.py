@@ -19,7 +19,6 @@
 import json
 from channels.db import database_sync_to_async
 from channels.generic.websocket import AsyncWebsocketConsumer
-from django.contrib.auth.models import User
 from django.urls import reverse
 from django.conf import settings
 from pywebpush import webpush, WebPushException
@@ -81,7 +80,7 @@ def user_group(user_id):
 
 
 @database_sync_to_async
-def get_other_participant(room_name, user) -> User | None:
+def get_other_participant(room_name, user):
     """
     Ищет запись модели Friendship по названию комнаты (room_name) со статусом подтвержденной дружбы (ACCEPTED)
     Сравнивает ID текущего пользователя с участниками связи (from_user и to_user)
