@@ -1,5 +1,5 @@
 from django.urls import path
-from .views import CallView, ContactsView
+from .views import CallView, ContactsView, turn_credentials
 
 app_name = "calls"
 
@@ -9,4 +9,5 @@ urlpatterns = [
         "call/<str:room_name>/", CallView.as_view(), name="call_room"
     ),  # Динамическая комната для звонка
     path("calls/", CallView.as_view(), name="call_test"),
+    path("calls/turn/", turn_credentials, name="turn"),
 ]

@@ -1,5 +1,6 @@
 from django.conf import settings
 from django.db import models
+from django.utils import timezone
 import uuid
 
 
@@ -9,7 +10,6 @@ class Friendship(models.Model):
     class Status(models.TextChoices):
         PENDING = "pending", "В ожидании"
         ACCEPTED = "accepted", "Друзья"
-        BLOCKED = "blocked", "Заблокирован"
 
     from_user = models.ForeignKey(
         settings.AUTH_USER_MODEL,
@@ -56,7 +56,6 @@ class CallHistory(models.Model):
     class CallStatus(models.TextChoices):
         COMPLETED = "completed", "Завершен"
         MISSED = "missed", "Пропущен"
-        CANCELLED = "cancelled", "Отменен"
 
     caller = models.ForeignKey(
         settings.AUTH_USER_MODEL,
@@ -87,6 +86,16 @@ class CallHistory(models.Model):
         default=CallStatus.COMPLETED,
         verbose_name="Статус звонка",
     )
+
+    @property
+    def formatted_time(self):
+        """Отображать время звонка если он сегодня и дату если не сегодня"""
+        local_time = timezone.localtime(self.start_time)
+        now = timezone.localtime(timezone.now())
+
+        if local_time.date() == now.date():
+            return local_time.strftime("%H:%M")
+        return local_time.strftime("%d.%m.%Y")
 
     class Meta:
         verbose_name = "История звонка"

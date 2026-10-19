@@ -24,9 +24,10 @@
 </head>
 
 <body>
-<header class="border-bottom">
+{% block header %}
+<header>
     <div class="container-fluid px-2 px-md-3">
-        <div class="d-flex align-items-center justify-content-between py-2 gap-2">
+        <div class="d-flex align-items-center justify-content-between py-3 gap-2">
 
             <div class="d-flex align-items-center text-truncate">
                 <a href="{% url 'accounts:main' %}"
@@ -88,6 +89,7 @@
         </div>
     </div>
 </header>
+{% endblock %}
 
 <div class="container py-2">
 

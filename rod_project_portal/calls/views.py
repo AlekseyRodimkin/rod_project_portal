@@ -7,10 +7,14 @@ from django.shortcuts import get_object_or_404, redirect
 from .models import Friendship, CallHistory, PushSubscription
 from django.contrib import messages
 import json
-from django.contrib.auth.decorators import login_required
 from django.http import JsonResponse, FileResponse
 from django.views.decorators.http import require_POST
+import base64
+import hashlib
+import hmac
+import time
 from django.conf import settings
+from django.contrib.auth.decorators import login_required
 
 User = get_user_model()
 
@@ -55,25 +59,27 @@ class ContactsView(LoginRequiredMixin, TemplateView):
         user = self.request.user
         context["vapid_public_key"] = settings.VAPID_PUBLIC_KEY
 
-        # Поиск пользователей
-        search_query = self.request.GET.get("q", "").strip()
-        search_results = []
-        if (
-            search_query and len(search_query) >= 2
-        ):  # Ищем пользователей, исключая самого себя
-            search_results = User.objects.filter(
-                username__icontains=search_query
-            ).exclude(id=user.id)[:5]
-
         # Получаем список друзей (где текущий пользователь либо from_user, либо to_user со статусом 'accepted')
         friendships = Friendship.objects.filter(
             (Q(from_user=user) | Q(to_user=user)) & Q(status=Friendship.Status.ACCEPTED)
         ).select_related("from_user", "to_user")
 
         friends = []
+        friend_ids = [user.id]
+
         for f in friendships:
             friend = f.to_user if f.from_user == user else f.from_user
             friends.append({"user": friend, "room_name": f.room_name})
+            friend_ids.append(friend.id)
+
+        # Поиск пользователей
+        search_query = self.request.GET.get("q", "").strip()
+        search_results = []
+
+        if search_query and len(search_query) >= 2:
+            search_results = User.objects.filter(
+                username__icontains=search_query
+            ).exclude(id__in=friend_ids)[:5]  # Ищем пользователей, исключая самого себя, друзей со срезом 5
 
         # История звонков для текущего пользователя
         call_history = CallHistory.objects.filter(
@@ -134,3 +140,27 @@ def push_subscribe(request):
                   'auth': data['keys']['auth']},
     )
     return JsonResponse({'ok': True})
+
+
+@login_required
+def turn_credentials(request):
+    """Выдаёт ICE-серверы с временным логином/паролем для TURN (действуют 1 час)."""
+    username = f"{int(time.time()) + 3600}:{request.user.id}"
+    digest = hmac.new(
+        settings.TURN_SECRET.encode(), username.encode(), hashlib.sha1
+    ).digest()
+    credential = base64.b64encode(digest).decode()
+    host = settings.TURN_HOST
+    return JsonResponse({
+        "iceServers": [
+            {"urls": f"stun:{host}:3478"},
+            {
+                "urls": [
+                    f"turn:{host}:3478?transport=udp",
+                    f"turn:{host}:3478?transport=tcp",
+                ],
+                "username": username,
+                "credential": credential,
+            },
+        ]
+    })

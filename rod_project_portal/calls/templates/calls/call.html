@@ -1,11 +1,13 @@
 {% extends 'accounts/base.html' %}
 
 {% block title %}
-Тест звонка
+Звонок
 {% endblock %}
 
 {% block body %}
-<div class="videos d-flex flex-column justify-content-center align-items-center bg-body-secondary rounded-4 overflow-hidden shadow position-relative p-1"
+{% block header %}{% endblock %}
+
+<div class="videos d-flex flex-column justify-content-center align-items-center overflow-hidden position-relative p-0"
      style="min-height: 650px;">
 
     <!-- Адаптивная обертка собеседника -->
@@ -45,7 +47,7 @@
 
     <!-- Панель управления под видео -->
     <div class="w-100 d-flex justify-content-center mx-auto" style="max-width: 580px;">
-        <div class="card shadow-lg border-0 rounded-pill text-white px-3 py-2 w-100">
+        <div class="card border-1 rounded-pill text-white px-3 py-2 w-100">
             <div class="d-flex align-items-center justify-content-center justify-content-md-between flex-wrap gap-2 py-1">
 
                 <!-- Статус -->
@@ -95,7 +97,8 @@
 
                     <!-- Поле ввода комнаты больше не нужно пользователю, делаем его скрытым -->
                     <input id="room" type="hidden" value="{{ room_name }}"
-                           data-contacts-url="{% url 'calls:contacts' %}">
+                           data-contacts-url="{% url 'calls:contacts' %}"
+                           data-turn-url="{% url 'calls:turn' %}">
 
                     <!--                    <div-->
                     <!--                         class="input-group input-group-sm bg-dark bg-opacity-50 rounded-pill overflow-hidden border border-secondary border-opacity-50"-->

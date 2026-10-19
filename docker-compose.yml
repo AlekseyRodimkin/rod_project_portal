@@ -12,7 +12,7 @@ services:
     networks:
       - default
       - remnawave-network
-#    ports:
+      #    ports:
       #      - "8000:8000"
     volumes:
       - ./db:/app/db
@@ -24,6 +24,29 @@ services:
     image: redis:7-alpine
     container_name: rod_project_redis_container
     restart: unless-stopped
+
+  coturn:
+    image: coturn/coturn:latest
+    container_name: coturn
+    network_mode: host
+    restart: unless-stopped
+    command:
+      - -n
+      - --realm=rod-project.24-7.ro
+      - --listening-port=3478
+      - --external-ip=${TURN_HOST}
+      - --min-port=49160
+      - --max-port=49200
+      - --use-auth-secret
+      - --static-auth-secret=${TURN_SECRET}
+      - --fingerprint
+      - --no-multicast-peers
+      - --no-cli
+      - --no-tls
+      - --no-dtls
+      - --denied-peer-ip=10.0.0.0-10.255.255.255
+      - --denied-peer-ip=172.16.0.0-172.31.255.255
+      - --denied-peer-ip=192.168.0.0-192.168.255.255
 
 networks:
   remnawave-network:

@@ -24,10 +24,10 @@ else:
     REDIS_HOST = "portal_redis"
 
 ALLOWED_HOSTS = [
-    "localhost",
-    "0.0.0.0",
-    "127.0.0.1",
-] + os.getenv(
+                    "localhost",
+                    "0.0.0.0",
+                    "127.0.0.1",
+                ] + os.getenv(
     "DJANGO_ALLOWED_HOSTS", ""
 ).split(",")
 
@@ -125,7 +125,7 @@ AUTH_PASSWORD_VALIDATORS = [
 ]
 
 LANGUAGE_CODE = "ru-RU"
-TIME_ZONE = "UTC"
+TIME_ZONE = "Europe/Moscow"
 USE_I18N = True
 USE_TZ = True
 
@@ -167,3 +167,6 @@ if not DEBUG:
     SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
     SESSION_COOKIE_SECURE = True
     CSRF_COOKIE_SECURE = True
+
+TURN_SECRET = os.getenv("TURN_SECRET", "")
+TURN_HOST = os.getenv("TURN_HOST", "")

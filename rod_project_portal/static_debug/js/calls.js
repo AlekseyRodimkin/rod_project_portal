@@ -14,11 +14,27 @@ localStream = null; // свой поток (камера + микрофон)
 let queue = Promise.resolve();
 let ended = false; // Флаг «звонок уже завершён» — защита от повторного завершения
 const CONTACTS_URL = ($('room') && $('room').dataset.contactsUrl) || '/portal/contacts/';
+const TURN_URL = ($('room') && $('room').dataset.turnUrl) || '/portal/calls/turn/';
 const AUDIO_ONLY = new URLSearchParams(window.location.search).get('mode') === 'audio'; // Режим звонка: ?mode=audio — только звук, камера не запрашивается и не включается
 const ringback = new Audio('/static/sounds/ringback.mp3');
 ringback.loop = true;
 
 let ringbackWanted = false;   // нужны ли сейчас гудки
+
+let ICE_SERVERS = [{ urls: 'stun:stun.l.google.com:19302' }];
+
+async function loadIceServers() {
+  try {
+    // Запрос к Django-view turn_credentials. Он выдаёт временные логин и пароль
+    // для coturn. credentials: 'same-origin' отправляет cookie сессии, view
+    // закрыт @login_required и без cookie отдал бы редирект на логин.
+    const r = await fetch(TURN_URL, { credentials: 'same-origin' });
+    // r.ok = статус 200–299. Если сервер ответил ошибкой (например, 302/403),
+    // r.json() разбирает ответ вида {"iceServers": [{stun...}, {turn..., username, credential}]},
+    // берём из него массив iceServers и подменяем им переменную.
+    if (r.ok) ICE_SERVERS = (await r.json()).iceServers;
+  } catch (e) { console.warn('TURN недоступен, только STUN', e); }   // Сеть недоступна, ответ не JSON и т. п. Пишем предупреждение в консоль и не падаем
+}
 
 function startRingback() {
   ringbackWanted = true;
@@ -43,8 +59,8 @@ function stopRingback() {
 // Создание нового WebRTC-соединения
 function createPeer() {
   closePeer(); // Сначала убираем старое соединение, если оно было
-  // STUN-сервер Google нужен, чтобы узнать свой публичный адрес и пробить NAT
-  pc = new RTCPeerConnection({ iceServers: [{ urls: 'stun:stun.l.google.com:19302' }] });
+
+  pc = new RTCPeerConnection({ iceServers: ICE_SERVERS });
   if (localStream) { // Добавляем свои дорожки (аудио и видео) - их увидит собеседник
     localStream.getTracks().forEach(t => pc.addTrack(t, localStream));
   }
@@ -77,7 +93,7 @@ function createPeer() {
   // Показываем состояние соединения: connecting, connected, failed и т.д.
   pc.onconnectionstatechange = () => {
     if (!pc) return;
-    status('Соединение: ' + pc.connectionState);
+    status(pc.connectionState);
     if (pc.connectionState === 'connected') {
       stopRingback();
     } else if (pc.connectionState === 'failed') {
@@ -282,6 +298,7 @@ window.addEventListener('DOMContentLoaded', async () => {
 
     status('Подключение...');
 
+    await loadIceServers();   // получаем TURN-данные до входа в комнату
     // Сразу же запускаем вход в комнату по WebSocket (после получения потока, чтобы дорожки уже были готовы)
     autoJoinRoom();
 
