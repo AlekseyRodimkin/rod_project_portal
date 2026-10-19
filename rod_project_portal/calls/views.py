@@ -122,15 +122,15 @@ class ContactsView(LoginRequiredMixin, TemplateView):
         return redirect("calls:contacts")
 
 
-# @login_required
-# @require_POST
-# def push_subscribe(request):
-#     """Для браузерных уведомлений"""
-#     data = json.loads(request.body)
-#     PushSubscription.objects.update_or_create(
-#         endpoint=data['endpoint'],
-#         defaults={'user': request.user,
-#                   'p256dh': data['keys']['p256dh'],
-#                   'auth': data['keys']['auth']},
-#     )
-#     return JsonResponse({'ok': True})
+@login_required
+@require_POST
+def push_subscribe(request):
+    """Для браузерных уведомлений"""
+    data = json.loads(request.body)
+    PushSubscription.objects.update_or_create(
+        endpoint=data['endpoint'],
+        defaults={'user': request.user,
+                  'p256dh': data['keys']['p256dh'],
+                  'auth': data['keys']['auth']},
+    )
+    return JsonResponse({'ok': True})

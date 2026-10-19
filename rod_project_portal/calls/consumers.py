@@ -35,48 +35,48 @@ def user_group(user_id):
 
 
 # Располагать функцию до CallConsumer !!!
-# @database_sync_to_async
-# def send_push(user_id, payload):
-#     """
-#     Отправляет Web Push-уведомление на все устройства пользователя
-#     Аргументы:
-#         user_id (int): id пользователя-получателя.
-#         payload (dict): содержимое уведомления, уходит в sw.js как JSON
-#             title (str): заголовок («Входящий звонок»)
-#             body  (str): текст (имя звонящего)
-#             tag   (str): идентификатор; уведомление с тем же tag заменяет старое
-#             url   (str): куда перейти по нажатию (страница звонка)
-#
-#     Как работает:
-#         - берёт все подписки пользователя из PushSubscription (по одной на устройство)
-#         - отправляет каждой через pywebpush с подписью VAPID-ключом
-#         - ttl=30: если телефон недоступен 30 секунд, уведомление отбрасывается
-#           (устаревший звонок не нужен)
-#         - Urgency=high: просит доставить немедленно
-#
-#     Ошибки:
-#         - подписка устарела (404/410: приложение удалено или разрешение отозвано)
-#         - удаляется из базы
-#         - остальные ошибки отдельной подписки не мешают отправке на другие.
-#
-#     Возвращает: None. Функция синхронная (сетевой запрос), поэтому обёрнута в
-#     database_sync_to_async и безопасно вызывается из async-кода consumer через await
-#     """
-#     from calls.models import PushSubscription
-#     for sub in PushSubscription.objects.filter(user_id=user_id):
-#         try:
-#             webpush(
-#                 subscription_info={"endpoint": sub.endpoint,
-#                                    "keys": {"p256dh": sub.p256dh, "auth": sub.auth}},
-#                 data=json.dumps(payload),
-#                 vapid_private_key=settings.VAPID_PRIVATE_KEY,
-#                 vapid_claims={"sub": settings.VAPID_SUBJECT},
-#                 ttl=30,
-#                 headers={"Urgency": "high"},
-#             )
-#         except WebPushException as e:
-#             if e.response is not None and e.response.status_code in (404, 410):
-#                 sub.delete()
+@database_sync_to_async
+def send_push(user_id, payload):
+    """
+    Отправляет Web Push-уведомление на все устройства пользователя
+    Аргументы:
+        user_id (int): id пользователя-получателя.
+        payload (dict): содержимое уведомления, уходит в sw.js как JSON
+            title (str): заголовок («Входящий звонок»)
+            body  (str): текст (имя звонящего)
+            tag   (str): идентификатор; уведомление с тем же tag заменяет старое
+            url   (str): куда перейти по нажатию (страница звонка)
+
+    Как работает:
+        - берёт все подписки пользователя из PushSubscription (по одной на устройство)
+        - отправляет каждой через pywebpush с подписью VAPID-ключом
+        - ttl=30: если телефон недоступен 30 секунд, уведомление отбрасывается
+          (устаревший звонок не нужен)
+        - Urgency=high: просит доставить немедленно
+
+    Ошибки:
+        - подписка устарела (404/410: приложение удалено или разрешение отозвано)
+        - удаляется из базы
+        - остальные ошибки отдельной подписки не мешают отправке на другие.
+
+    Возвращает: None. Функция синхронная (сетевой запрос), поэтому обёрнута в
+    database_sync_to_async и безопасно вызывается из async-кода consumer через await
+    """
+    from calls.models import PushSubscription
+    for sub in PushSubscription.objects.filter(user_id=user_id):
+        try:
+            webpush(
+                subscription_info={"endpoint": sub.endpoint,
+                                   "keys": {"p256dh": sub.p256dh, "auth": sub.auth}},
+                data=json.dumps(payload),
+                vapid_private_key=settings.VAPID_PRIVATE_KEY,
+                vapid_claims={"sub": settings.VAPID_SUBJECT},
+                ttl=30,
+                headers={"Urgency": "high"},
+            )
+        except WebPushException as e:
+            if e.response is not None and e.response.status_code in (404, 410):
+                sub.delete()
 
 
 @database_sync_to_async
