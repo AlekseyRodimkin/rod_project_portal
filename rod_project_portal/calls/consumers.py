@@ -28,6 +28,7 @@ from pywebpush import webpush, WebPushException
 # channel_name — уникальный идентификатор соединения в Channels
 
 ROOMS = {}
+PENDING = {}
 
 
 def user_group(user_id):
@@ -109,27 +110,17 @@ def get_other_participant(room_name, user):
 class CallConsumer(AsyncWebsocketConsumer):
     # Клиент открыл WebSocket-соединение
     async def connect(self):
-        self.room_name = (
-            None  # Пока клиент не прислал "join", он ни в какой комнате не состоит
-        )
+        self.room_name = None  # Пока клиент не прислал "join", он ни в какой комнате не состоит
         # Принимаем соединение
-        self.callee_id = (
-            None  # Кому мы звонили (id), чтобы отменить его окно, если бросим трубку
-        )
+        self.callee_id = None  # Кому мы звонили (id), чтобы отменить его окно, если бросим трубку
         await self.accept()
 
     # Соединение закрыто (клиент ушёл, закрыл вкладку, пропала сеть)
     async def disconnect(self, close_code):
-        if (
-                self.room_name and self.room_name in ROOMS
-        ):  # Действуем, только если клиент успел войти в существующую комнату
-            ROOMS[self.room_name].discard(
-                self.channel_name
-            )  # Убираем этого участника из комнаты (discard не падает, если его там уже нет).
+        if self.room_name and self.room_name in ROOMS:  # Действуем, только если клиент успел войти в существующую комнату
+            ROOMS[self.room_name].discard(self.channel_name)  # Убираем этого участника из комнаты (discard не падает, если его там уже нет).
 
-            for channel_name in ROOMS[
-                self.room_name
-            ]:  # Сообщаем оставшемуся участнику, что собеседник вышел
+            for channel_name in ROOMS[self.room_name]:  # Сообщаем оставшемуся участнику, что собеседник вышел
                 await self.channel_layer.send(
                     channel_name,
                     {
@@ -154,6 +145,7 @@ class CallConsumer(AsyncWebsocketConsumer):
 
             # Если комната опустела — удаляем её, чтобы не копить мусор
             if not ROOMS[self.room_name]:
+                PENDING.pop(self.room_name, None)
                 del ROOMS[self.room_name]
 
     # Пришло сообщение от клиента
@@ -175,14 +167,10 @@ class CallConsumer(AsyncWebsocketConsumer):
                 return
 
             self.room_name = room
-            peers = ROOMS.setdefault(
-                self.room_name, set()
-            )  # Берём набор участников комнаты, если комнаты нет - создаём пустую
+            peers = ROOMS.setdefault(self.room_name,set())  # Берём набор участников комнаты, если комнаты нет - создаём пустую
 
             if len(peers) >= 2:  # В комнате уже двое — это соединение лишнее
-                await self.send(
-                    text_data=json.dumps({"type": "full"})
-                )  # Говорим клиенту, что комната занята
+                await self.send(text_data=json.dumps({"type": "full"}))  # Говорим клиенту, что комната занята
                 # Сбрасываем комнату, чтобы при отключении этот клиент
                 # не повлиял на чужую комнату (не отправил "peer-left")
                 self.room_name = None
@@ -196,9 +184,9 @@ class CallConsumer(AsyncWebsocketConsumer):
                     {"type": "room_message", "content": {"type": "peer-joined"}},
                 )
 
-            peers.add(
-                self.channel_name
-            )  # Добавляем себя в комнату (после рассылки, чтобы не уведомлять себя)
+            peers.add(self.channel_name)  # Добавляем себя в комнату (после рассылки, чтобы не уведомлять себя)
+            if len(peers) == 2:  # Собеседник ответил: звонок больше не висит
+                PENDING.pop(self.room_name, None)
 
             # Если мы первые — сообщаем клиенту, что нужно ждать собеседника
             if len(peers) == 1:
@@ -211,32 +199,30 @@ class CallConsumer(AsyncWebsocketConsumer):
                         if callee:
                             self.callee_id = callee.id
                             audio = bool(data.get("audio"))
-                            call_url = reverse(
-                                "calls:call_room", kwargs={"room_name": self.room_name}
-                            )
+                            call_url = reverse("calls:call_room", kwargs={"room_name": self.room_name})
                             if audio:
                                 call_url += "?mode=audio"
 
                             # Окно «Ответить / Сбросить» (сначала, чтобы сбой push его не отменил)
+                            payload = {
+                                "type": "incoming-call",
+                                "room": self.room_name,
+                                "caller": user.get_username(),
+                                "url": call_url,
+                                "audio": audio,
+                            }
+                            PENDING[self.room_name] = {"callee_id": callee.id, "content": payload}
+
                             await self.channel_layer.group_send(
                                 user_group(callee.id),
-                                {
-                                    "type": "notify",
-                                    "content": {
-                                        "type": "incoming-call",
-                                        "room": self.room_name,
-                                        "caller": user.get_username(),
-                                        "url": call_url,
-                                        "audio": audio,
-                                    },
-                                },
+                                {"type": "notify", "content": payload},
                             )
 
                             # Push на телефон
                             print("sending push to", callee.id)
                             await send_push(callee.id, {
-                                "title": "Входящий аудиозвонок" if audio else "Входящий видеозвонок",
-                                "body": user.get_username(),
+                                "title": user.get_username(),
+                                "body": "Входящий аудиозвонок" if audio else "Входящий видеозвонок",
                                 "tag": f"call-{self.room_name}",
                                 "url": call_url,
                             })
@@ -264,9 +250,8 @@ class CallConsumer(AsyncWebsocketConsumer):
 
     # Обработчик сообщений, пришедших через channel layer от других участников (вызывается Channels по "type": "room_message")
     async def room_message(self, event):
-        await self.send(
-            text_data=json.dumps(event["content"])
-        )  # Достаём полезную часть и отправляем её своему клиенту по WebSocket
+        await self.send(text_data=json.dumps(
+            event["content"]))  # Достаём полезную часть и отправляем её своему клиенту по WebSocket
 
 
 # Постоянный сокет пользователя для уведомлений о входящих звонках.
@@ -282,10 +267,15 @@ class IncomingCallConsumer(AsyncWebsocketConsumer):
         self.user = user
         self.group = user_group(user.id)
 
-        await self.channel_layer.group_add(
-            self.group, self.channel_name
-        )  # Подписываемся на личную группу: сюда пишет CallConsumer
+        await self.channel_layer.group_add(self.group,
+                                           self.channel_name)  # Подписываемся на личную группу: сюда пишет CallConsumer
         await self.accept()
+
+        # Если звонок пришёл, пока сокета не было (телефон был заблокирован),
+        # показываем окно сейчас
+        for call in list(PENDING.values()):
+            if call["callee_id"] == user.id:
+                await self.send(text_data=json.dumps(call["content"]))
 
     async def disconnect(self, close_code):
         if getattr(self, "group", None):
@@ -297,20 +287,14 @@ class IncomingCallConsumer(AsyncWebsocketConsumer):
         except json.JSONDecodeError:
             return
 
-        if (
-                data.get("type") == "decline"
-        ):  # Собеседник нажал «Сбросить» в окне входящего звонка
+        if (data.get("type") == "decline"):  # Собеседник нажал «Сбросить» в окне входящего звонка
             room = data.get("room")
             if not room:
                 return
-            if not await get_other_participant(
-                    room, self.user
-            ):  # Защита: сбросить можно только вызов в своей комнате
+            if not await get_other_participant(room, self.user):  # Защита: сбросить можно только вызов в своей комнате
                 return
 
-            for channel_name in ROOMS.get(
-                    room, set()
-            ):  # Сообщаем звонящему (он сидит в комнате) - он завершит звонок
+            for channel_name in ROOMS.get(room, set()):  # Сообщаем звонящему (он сидит в комнате) - он завершит звонок
                 await self.channel_layer.send(
                     channel_name,
                     {"type": "room_message", "content": {"type": "call-declined"}},
