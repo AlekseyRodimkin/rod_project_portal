@@ -65,7 +65,7 @@ def send_push(user_id, payload):
     from calls.models import PushSubscription
     for sub in PushSubscription.objects.filter(user_id=user_id):
         try:
-            webpush(
+            r = webpush(
                 subscription_info={"endpoint": sub.endpoint,
                                    "keys": {"p256dh": sub.p256dh, "auth": sub.auth}},
                 data=json.dumps(payload),
@@ -74,6 +74,7 @@ def send_push(user_id, payload):
                 ttl=30,
                 headers={"Urgency": "high"},
             )
+            print("push sent:", sub.endpoint[:50], r.status_code)
         except WebPushException as e:
             print("push error:", repr(e))
             if e.response is not None and e.response.status_code in (404, 410):
@@ -232,6 +233,7 @@ class CallConsumer(AsyncWebsocketConsumer):
                             )
 
                             # Push на телефон
+                            print("sending push to", callee.id)
                             await send_push(callee.id, {
                                 "title": "Входящий аудиозвонок" if audio else "Входящий видеозвонок",
                                 "body": user.get_username(),
