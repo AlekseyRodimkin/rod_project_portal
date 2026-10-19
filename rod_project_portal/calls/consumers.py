@@ -229,12 +229,12 @@ class CallConsumer(AsyncWebsocketConsumer):
                             )
 
                             # Push на телефон
-                            # await send_push(callee.id, {
-                            #     "title": "Входящий аудиозвонок" if audio else "Входящий видеозвонок",
-                            #     "body": user.get_username(),
-                            #     "tag": f"call-{self.room_name}",
-                            #     "url": call_url,
-                            # })
+                            await send_push(callee.id, {
+                                "title": "Входящий аудиозвонок" if audio else "Входящий видеозвонок",
+                                "body": user.get_username(),
+                                "tag": f"call-{self.room_name}",
+                                "url": call_url,
+                            })
                     except Exception as e:
                         print("Не удалось отправить уведомление о звонке:", repr(e))
 
