@@ -75,8 +75,11 @@ def send_push(user_id, payload):
                 headers={"Urgency": "high"},
             )
         except WebPushException as e:
+            print("push error:", repr(e))
             if e.response is not None and e.response.status_code in (404, 410):
                 sub.delete()
+        except Exception as e:
+            print("push error:", repr(e))
 
 
 @database_sync_to_async
@@ -117,7 +120,7 @@ class CallConsumer(AsyncWebsocketConsumer):
     # Соединение закрыто (клиент ушёл, закрыл вкладку, пропала сеть)
     async def disconnect(self, close_code):
         if (
-            self.room_name and self.room_name in ROOMS
+                self.room_name and self.room_name in ROOMS
         ):  # Действуем, только если клиент успел войти в существующую комнату
             ROOMS[self.room_name].discard(
                 self.channel_name
@@ -235,6 +238,7 @@ class CallConsumer(AsyncWebsocketConsumer):
                                 "tag": f"call-{self.room_name}",
                                 "url": call_url,
                             })
+
                     except Exception as e:
                         print("Не удалось отправить уведомление о звонке:", repr(e))
 
@@ -292,18 +296,18 @@ class IncomingCallConsumer(AsyncWebsocketConsumer):
             return
 
         if (
-            data.get("type") == "decline"
+                data.get("type") == "decline"
         ):  # Собеседник нажал «Сбросить» в окне входящего звонка
             room = data.get("room")
             if not room:
                 return
             if not await get_other_participant(
-                room, self.user
+                    room, self.user
             ):  # Защита: сбросить можно только вызов в своей комнате
                 return
 
             for channel_name in ROOMS.get(
-                room, set()
+                    room, set()
             ):  # Сообщаем звонящему (он сидит в комнате) - он завершит звонок
                 await self.channel_layer.send(
                     channel_name,
