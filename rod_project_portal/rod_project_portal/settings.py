@@ -141,9 +141,9 @@ STATICFILES_DIRS = [
 LOGIN_REDIRECT_URL = reverse_lazy("accounts:main")
 LOGIN_URL = "login/"
 
-# Хранение сессии 24 часов
+# Хранение сессии 30 дней
 # Окончание сессии при закрытии браузера отключено
-SESSION_COOKIE_AGE = 60 * 60 * 24
+SESSION_COOKIE_AGE = 60 * 60 * 720
 SESSION_EXPIRE_AT_BROWSER_CLOSE = False
 
 APPEND_SLASH = True
