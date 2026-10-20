@@ -1,3 +1,10 @@
+import json
+from channels.db import database_sync_to_async
+from channels.generic.websocket import AsyncWebsocketConsumer
+from django.urls import reverse
+from django.conf import settings
+from pywebpush import webpush, WebPushException
+
 # Серверная часть видеозвонка: сигнальный WebSocket-сервер (Django Channels)
 # Сам видеопоток через сервер не идёт — он передаётся напрямую между
 # браузерами по WebRTC
@@ -16,26 +23,15 @@
 # Python → JS	peer-left	«Собеседник ушёл»
 # Python → JS	full	«Комната занята»
 
-import json
-from channels.db import database_sync_to_async
-from channels.generic.websocket import AsyncWebsocketConsumer
-from django.urls import reverse
-from django.conf import settings
-from pywebpush import webpush, WebPushException
-
-# Хранилище комнат в памяти процесса:
-#   { "имя_комнаты": {channel_name_1, channel_name_2} }
-# channel_name — уникальный идентификатор соединения в Channels
-
 ROOMS = {}
 PENDING = {}
+CALLS = {}
 
 
 def user_group(user_id):
     return f"user_{user_id}"
 
 
-# Располагать функцию до CallConsumer !!!
 @database_sync_to_async
 def send_push(user_id, payload):
     """
@@ -107,6 +103,26 @@ def get_other_participant(room_name, user):
     return None  # пользователь не участник этой комнаты
 
 
+@database_sync_to_async
+def create_call_record(caller, callee, room_name):
+    from calls.models import CallHistory
+    return CallHistory.create_with_limit(caller, callee, room_name).id
+
+
+@database_sync_to_async
+def update_call_record(call_id, status=None, finish=False):
+    from django.utils import timezone
+    from calls.models import CallHistory
+
+    fields = {}
+    if status:
+        fields["status"] = status
+    if finish:
+        fields["end_time"] = timezone.now()
+    if fields:
+        CallHistory.objects.filter(id=call_id).update(**fields)
+
+
 class CallConsumer(AsyncWebsocketConsumer):
     # Клиент открыл WebSocket-соединение
     async def connect(self):
@@ -118,7 +134,8 @@ class CallConsumer(AsyncWebsocketConsumer):
     # Соединение закрыто (клиент ушёл, закрыл вкладку, пропала сеть)
     async def disconnect(self, close_code):
         if self.room_name and self.room_name in ROOMS:  # Действуем, только если клиент успел войти в существующую комнату
-            ROOMS[self.room_name].discard(self.channel_name)  # Убираем этого участника из комнаты (discard не падает, если его там уже нет).
+            ROOMS[self.room_name].discard(
+                self.channel_name)  # Убираем этого участника из комнаты (discard не падает, если его там уже нет).
 
             for channel_name in ROOMS[self.room_name]:  # Сообщаем оставшемуся участнику, что собеседник вышел
                 await self.channel_layer.send(
@@ -146,28 +163,29 @@ class CallConsumer(AsyncWebsocketConsumer):
             # Если комната опустела — удаляем её, чтобы не копить мусор
             if not ROOMS[self.room_name]:
                 PENDING.pop(self.room_name, None)
+                call_id = CALLS.pop(self.room_name, None)
+                if call_id:
+                    await update_call_record(call_id, finish=True)
                 del ROOMS[self.room_name]
 
-    # Пришло сообщение от клиента
-    async def receive(self, text_data):
+    async def receive(self, text_data):  # Пришло сообщение от клиента
         # Ожидаем JSON, при невалидных данных молча игнорируем сообщение
         try:
             data = json.loads(text_data)
         except json.JSONDecodeError:
             return
 
-        # Тип сообщения: "join" (войти в комнату) или "signal" (служебные данные)
-        msg_type = data.get("type")
+        msg_type = data.get("type")  # Тип сообщения: "join" (войти в комнату) или "signal" (служебные данные)
 
         # Вход в комнату
-        # Принимаем "join" только один раз: если комната уже выбрана, игнорируем
-        if msg_type == "join" and not self.room_name:
+        if msg_type == "join" and not self.room_name:  # Принимаем "join" только один раз: если комната уже выбрана, игнорируем
             room = data.get("room")
             if not room:  # Без имени комнаты входить некуда
                 return
 
             self.room_name = room
-            peers = ROOMS.setdefault(self.room_name,set())  # Берём набор участников комнаты, если комнаты нет - создаём пустую
+            peers = ROOMS.setdefault(self.room_name,
+                                     set())  # Берём набор участников комнаты, если комнаты нет - создаём пустую
 
             if len(peers) >= 2:  # В комнате уже двое — это соединение лишнее
                 await self.send(text_data=json.dumps({"type": "full"}))  # Говорим клиенту, что комната занята
@@ -187,6 +205,9 @@ class CallConsumer(AsyncWebsocketConsumer):
             peers.add(self.channel_name)  # Добавляем себя в комнату (после рассылки, чтобы не уведомлять себя)
             if len(peers) == 2:  # Собеседник ответил: звонок больше не висит
                 PENDING.pop(self.room_name, None)
+                call_id = CALLS.get(self.room_name)
+                if call_id:
+                    await update_call_record(call_id, status="completed")
 
             # Если мы первые — сообщаем клиенту, что нужно ждать собеседника
             if len(peers) == 1:
@@ -198,6 +219,9 @@ class CallConsumer(AsyncWebsocketConsumer):
                         callee = await get_other_participant(self.room_name, user)
                         if callee:
                             self.callee_id = callee.id
+                            CALLS[self.room_name] = await create_call_record(
+                                user, callee, self.room_name
+                            )
                             audio = bool(data.get("audio"))
                             call_url = reverse("calls:call_room", kwargs={"room_name": self.room_name})
                             if audio:

@@ -24,30 +24,7 @@ class CallView(LoginRequiredMixin, TemplateView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        user = self.request.user
-
-        room_name = kwargs.get("room_name", "test")
-        context["room_name"] = room_name
-
-        callee = None
-        # Ищем дружбу, к которой привязана эта комната
-        friendship = Friendship.objects.filter(room_name=room_name).first()
-
-        if friendship:
-            # Если текущий пользователь - это инициатор, то цель звонка - получатель. И наоборот
-            if friendship.from_user == user:
-                callee = friendship.to_user
-            else:
-                callee = friendship.from_user
-
-        # Создаем запись в истории звонков
-        CallHistory.objects.create(
-            caller=user,
-            callee=callee,
-            room_name=room_name,
-            status=CallHistory.CallStatus.COMPLETED,
-        )
-
+        context["room_name"] = kwargs.get("room_name", "test")
         return context
 
 

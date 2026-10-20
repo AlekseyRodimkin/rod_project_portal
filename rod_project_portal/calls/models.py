@@ -2,7 +2,7 @@ from django.conf import settings
 from django.db import models
 from django.utils import timezone
 import uuid
-
+from django.db.models import Q
 
 class Friendship(models.Model):
     """Модель для управления списком друзей и заявками в друзья"""
@@ -86,6 +86,27 @@ class CallHistory(models.Model):
         default=CallStatus.COMPLETED,
         verbose_name="Статус звонка",
     )
+    @classmethod
+    def create_with_limit(cls, caller, callee, room_name, limit=10):
+        """
+        Создаёт запись (по умолчанию «пропущен») и оставляет у каждого
+        участника только последние limit звонков
+        """
+        call = cls.objects.create(
+            caller=caller,
+            callee=callee,
+            room_name=room_name,
+            status=cls.CallStatus.MISSED,
+        )
+        for user in (caller, callee):
+            if user is None:
+                continue
+            user_calls = cls.objects.filter(Q(caller=user) | Q(callee=user))
+            keep_ids = list(
+                user_calls.order_by("-start_time").values_list("pk", flat=True)[:limit]
+            )
+            user_calls.exclude(pk__in=keep_ids).delete()
+        return call
 
     @property
     def formatted_time(self):
