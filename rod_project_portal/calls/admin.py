@@ -25,7 +25,7 @@ from .models import Friendship, CallHistory, PushSubscription
 @admin.register(Friendship)
 class FriendshipAdmin(admin.ModelAdmin):
     list_display = ("from_user", "to_user", "status", "created_at")
-    list_display_links = ("cfrom_useraller", "to_user")
+    list_display_links = ("from_user", "to_user")
     list_filter = ("status", "created_at")
     search_fields = ("from_user__username", "to_user__username")
     list_per_page = 25
