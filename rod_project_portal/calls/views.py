@@ -24,7 +24,20 @@ class CallView(LoginRequiredMixin, TemplateView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context["room_name"] = kwargs.get("room_name", "test")
+        user = self.request.user
+        room_name = kwargs.get("room_name", "test")
+        context["room_name"] = room_name
+
+        peer_name = "Собеседник"
+        friendship = (
+            Friendship.objects.filter(room_name=room_name)
+            .select_related("from_user", "to_user")
+            .first()
+        )
+        if friendship:
+            peer = friendship.to_user if friendship.from_user == user else friendship.from_user
+            peer_name = peer.get_username()
+        context["peer_name"] = peer_name
         return context
 
 

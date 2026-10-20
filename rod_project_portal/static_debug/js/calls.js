@@ -96,6 +96,7 @@ function createPeer() {
     status(pc.connectionState);
     if (pc.connectionState === 'connected') {
       stopRingback();
+      startTimer();
     } else if (pc.connectionState === 'failed') {
       endCall('Соединение потеряно', 1500);
     }
@@ -121,8 +122,8 @@ function closePeer() {
 function endCall(message, delay = 100) {
   if (ended) return;
   ended = true;
-
   stopRingback();
+  stopTimer();
   if (message) status(message);
 
   if (ws) {
@@ -308,3 +309,34 @@ window.addEventListener('DOMContentLoaded', async () => {
     console.error(err);
   }
 });
+
+// Таймер звонка: запускается, когда соединение установлено
+let timerInterval = null;
+
+function formatDuration(totalSeconds) {
+  const h = Math.floor(totalSeconds / 3600);
+  const m = Math.floor((totalSeconds % 3600) / 60);
+  const s = totalSeconds % 60;
+  const mm = String(m).padStart(2, '0');
+  const ss = String(s).padStart(2, '0');
+  return h > 0 ? `${h}:${mm}:${ss}` : `${mm}:${ss}`;
+}
+
+function startTimer() {
+  if (timerInterval) return;   // уже идёт (на случай повторного connected)
+  const timerEl = $('timer');
+  if (!timerEl) return;
+  const startedAt = Date.now();
+  timerEl.textContent = '00:00';
+  timerEl.classList.remove('d-none');
+  timerInterval = setInterval(() => {
+    timerEl.textContent = formatDuration(Math.floor((Date.now() - startedAt) / 1000));
+  }, 1000);
+}
+
+function stopTimer() {
+  if (timerInterval) {
+    clearInterval(timerInterval);
+    timerInterval = null;
+  }
+}

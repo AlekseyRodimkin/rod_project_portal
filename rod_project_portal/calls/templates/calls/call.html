@@ -19,7 +19,7 @@
         <video id="remote" autoplay playsinline class="w-100 h-100"
                style="object-fit: cover; background: #000;"></video>
         <div class="position-absolute top-0 start-0 m-3 px-2 py-1 bg-black bg-opacity-75 text-white rounded small z-2">
-            Собеседник
+            {{ peer_name }}
         </div>
 
         <!-- Адаптивное локальное видео (всегда в уголке) -->
@@ -54,7 +54,12 @@
                 <div>
                     <span id="status"
                           class="badge bg-secondary bg-opacity-50 rounded-pill px-3 py-2 text-white fw-normal"
-                          style="font-size: 0.8rem;">Ожидание</span>
+                          style="font-size: 0.8rem;">Ожидание
+                    </span>
+                    <span id="timer"
+                          class="badge bg-dark rounded-pill px-3 py-2 text-white fw-normal d-none"
+                          style="font-size: 0.8rem; font-variant-numeric: tabular-nums;">00:00
+                    </span>
                 </div>
 
                 <!-- Кнопки управления и инпут -->
