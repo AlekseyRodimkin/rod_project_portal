@@ -1,11 +1,12 @@
 {% extends 'accounts/base.html' %}
+{% load static %}
 
 {% block title %}
 VPN
 {% endblock %}
 
 {% block body %}
-<div class="mb-5">
+<div class="mb-5 bg-body-tertiary">
     <h3 class="mb-3 text-primary">VPN</h3>
 
     {% for vpn_item in user_vpns %}
@@ -324,6 +325,6 @@ VPN
 </div>
 {% endblock %}
 {% block scripts %}
-<script src="/static/js/copy.js"></script>
-<script src="/static/js/notification.js"></script>
+<script src="{% static '/js/copy.js' %}"></script>
+<script src="{% static '/js/notification.js' %}"></script>
 {% endblock %}

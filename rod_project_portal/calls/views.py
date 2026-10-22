@@ -34,9 +34,13 @@ class CallView(LoginRequiredMixin, TemplateView):
             .select_related("from_user", "to_user")
             .first()
         )
+
         if friendship:
             peer = friendship.to_user if friendship.from_user == user else friendship.from_user
             peer_name = peer.get_username()
+            profile = getattr(peer, "profile", None)
+            context["peer_avatar"] = profile.avatar.url if profile and profile.avatar else ""
+
         context["peer_name"] = peer_name
         return context
 
@@ -49,10 +53,9 @@ class ContactsView(LoginRequiredMixin, TemplateView):
         user = self.request.user
         context["vapid_public_key"] = settings.VAPID_PUBLIC_KEY
 
-        # Получаем список друзей (где текущий пользователь либо from_user, либо to_user со статусом 'accepted')
         friendships = Friendship.objects.filter(
             (Q(from_user=user) | Q(to_user=user)) & Q(status=Friendship.Status.ACCEPTED)
-        ).select_related("from_user", "to_user")
+        ).select_related("from_user__profile", "to_user__profile")
 
         friends = []
         friend_ids = [user.id]
@@ -69,7 +72,7 @@ class ContactsView(LoginRequiredMixin, TemplateView):
         if search_query and len(search_query) >= 2:
             search_results = User.objects.filter(
                 username__icontains=search_query
-            ).exclude(id__in=friend_ids)[:5]  # Ищем пользователей, исключая самого себя, друзей со срезом 5
+            ).exclude(id__in=friend_ids).select_related("profile")[:5]  # Ищем пользователей, исключая самого себя, друзей со срезом 5
 
         # История звонков для текущего пользователя
         call_history = CallHistory.objects.filter(
@@ -113,7 +116,6 @@ class ContactsView(LoginRequiredMixin, TemplateView):
             type=UserNotification.Type.INFO,
         )
 
-        # Создаем Всплывающее уведомление об успешном добавлении
         messages.success(request, f"{target_user.get_username()} добавлен(а) в друзья")
         return redirect("calls:contacts")
 

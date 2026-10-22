@@ -2,7 +2,10 @@
 // Звонок стартует автоматически при загрузке страницы.
 
 const $ = id => document.getElementById(id);
-const status = t => $('status').textContent = t; // Вывод текущего состояния звонка пользователю в элемент #status
+const status = t => {
+  stopTimer();   // любой новый статус останавливает таймер
+  $('status').textContent = t;
+};
 
 let ws = null; // WebSocket-соединение с сигнальным сервером
 pc = null; // WebRTC-соединение с собеседником (RTCPeerConnection)
@@ -69,22 +72,9 @@ function createPeer() {
     const remoteVideo = $('remote');
     remoteVideo.srcObject = e.streams[0]; // Показываем поток собеседника в <video id="remote">
 
-    // Когда известны размеры кадра — подгоняем контейнер под формат видео
-    remoteVideo.onloadedmetadata = () => {
-      const w = remoteVideo.videoWidth;
-      const h = remoteVideo.videoHeight;
-      const wrapper = $('remoteWrapper');
-      if (w && h) {
-        // Контейнер повторяет пропорции видео
-        wrapper.style.aspectRatio = `${w} / ${h}`;
-        if (w > h) {
-          // Горизонтальное видео (с компьютера) - шире
-          wrapper.style.maxWidth = '750px';
-        } else {
-          // Вертикальное видео (с телефона) - уже
-          wrapper.style.maxWidth = '380px';
-        }
-      }
+    // Видео собеседника пошло: убираем обои (в аудиозвонке они остаются всегда)
+    remoteVideo.onplaying = () => {
+      if (!AUDIO_ONLY) $('callBackdrop').classList.add('d-none');
     };
   };
 
@@ -93,7 +83,6 @@ function createPeer() {
   // Показываем состояние соединения: connecting, connected, failed и т.д.
   pc.onconnectionstatechange = () => {
     if (!pc) return;
-    status(pc.connectionState);
     if (pc.connectionState === 'connected') {
       stopRingback();
       startTimer();
@@ -105,10 +94,7 @@ function createPeer() {
 
 // Закрытие WebRTC-соединения и сброс окна собеседника
 function closePeer() {
-  if (pc) { pc.close(); pc = null; } // Закрываем соединение и обнуляем переменную
-  $('remote').srcObject = null; // Убираем видео собеседника
-  // Возвращаем контейнер к вертикальному формату по умолчанию
-  $('remoteWrapper').style.aspectRatio = '9/16';$('remoteWrapper').style.maxWidth = '380px';
+  if (pc) { pc.close(); pc = null; }
 }
 
 // Единое завершение звонка
@@ -119,31 +105,21 @@ function closePeer() {
 //  - обрыв соединения / сокета
 // Освобождает камеру, сокет, соединение и уводит на страницу контактов
 // message - текст статуса, delay - пауза (мс) перед редиректом, чтобы пользователь успел увидеть причину
+
 function endCall(message, delay = 100) {
   if (ended) return;
   ended = true;
+
+  if (message) status(message);
   stopRingback();
   stopTimer();
-  if (message) status(message);
 
-  if (ws) {
-    ws.close();
-  }
-
-  if (localStream) {
-    localStream.getTracks().forEach(track => track.stop());
-    localStream = null;
-  }
-  const localVideo = $('local');
-  if (localVideo) {
-    localVideo.srcObject = null;
-    localVideo.style.display = 'none';
-  }
-
+  if (ws) ws.close();
   closePeer();
 
+   // без задержки
   setTimeout(() => {
-    window.location.href = CONTACTS_URL;
+    window.location.replace(CONTACTS_URL);
   }, delay);
 }
 
@@ -277,7 +253,11 @@ window.addEventListener('DOMContentLoaded', async () => {
     status('Запрос доступа к камере и микрофону...');
 
     // Автоматически запрашиваем доступ
-    localStream = await navigator.mediaDevices.getUserMedia({ video: !AUDIO_ONLY, audio: true });
+//    localStream = await navigator.mediaDevices.getUserMedia({ video: !AUDIO_ONLY, audio: true });
+    localStream = await navigator.mediaDevices.getUserMedia({
+          video: AUDIO_ONLY ? false : { width: { ideal: 1280 }, height: { ideal: 720 }, facingMode: 'user' },
+          audio: true
+        });
     // Показываем своё видео в превью
     const localVideo = $('local');
     localVideo.srcObject = localStream;
@@ -290,6 +270,7 @@ window.addEventListener('DOMContentLoaded', async () => {
       const localWrapper = $('localWrapper');
       if (w && h) {
         localWrapper.style.aspectRatio = `${w} / ${h}`;
+        localWrapper.style.width = w > h ? '150px' : '100px'; // горизонтальная камера чуть шире
       }
     };
 
@@ -305,7 +286,10 @@ window.addEventListener('DOMContentLoaded', async () => {
 
   } catch (err) {
     // Отказ в доступе, нет устройств или небезопасный контекст (не HTTPS).
-    status('Ошибка доступа к камере/микрофону: ' + err.message);
+    // status('Ошибка доступа к камере/микрофону: ' + err.message);
+
+     status('Ошибка доступа к камере/микрофону');
+     console.log(err.message)
     console.error(err);
   }
 });
@@ -323,15 +307,14 @@ function formatDuration(totalSeconds) {
 }
 
 function startTimer() {
-  if (timerInterval) return;   // уже идёт (на случай повторного connected)
-  const timerEl = $('timer');
-  if (!timerEl) return;
+  if (timerInterval) return;
+  const el = $('status');
   const startedAt = Date.now();
-  timerEl.textContent = '00:00';
-  timerEl.classList.remove('d-none');
-  timerInterval = setInterval(() => {
-    timerEl.textContent = formatDuration(Math.floor((Date.now() - startedAt) / 1000));
-  }, 1000);
+  const tick = () => {
+    el.textContent = formatDuration(Math.floor((Date.now() - startedAt) / 1000));
+  };
+  tick();
+  timerInterval = setInterval(tick, 1000);
 }
 
 function stopTimer() {

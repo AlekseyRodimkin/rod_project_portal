@@ -10,7 +10,7 @@
 
         <div class="col-12 col-lg-7">
             <!-- Блок поиска -->
-            <form method="get" action="" class="input-group rounded-pill border bg-dark overflow-hidden mb-2">
+            <form method="get" action="" class="input-group rounded-pill border overflow-hidden mb-2">
                 <input type="text" name="q" class="form-control border-0 shadow-none px-3 bg-transparent"
                        placeholder="Найти друзей..." value="{{ search_query }}">
                 <button class="btn btn-primary border-0 rounded-pill px-4 d-flex align-items-center justify-content-center flex-shrink-0"
@@ -28,8 +28,18 @@
             {% if search_results %}
             <ul class="list-group list-group-flush rounded-3 overflow-hidden">
                 {% for person in search_results %}
-                <li class="list-group-item d-flex justify-content-between align-items-center py-2">
-                    <span>{{ person.username }}</span>
+                <li class="list-group-item d-flex justify-content-between align-items-center py-2 mb-2 border">
+
+                    <div class="d-flex align-items-center gap-2">
+                        <div class="rounded-circle overflow-hidden bg-secondary text-white d-flex align-items-center justify-content-center fw-bold flex-shrink-0"
+                             style="width: 36px; height: 36px;">
+                            {% if person.profile.avatar %}
+                            <img src="{{ person.profile.avatar.url }}" alt="" class="w-100 h-100 object-fit-cover">
+                            {% else %}{{ person.username|slice:":1"|upper }}{% endif %}
+                        </div>
+                        <span>{{ person.username }}</span>
+                    </div>
+
                     <form method="post" class="m-0">
                         {% csrf_token %}
                         <input type="hidden" name="action" value="add_friend">
@@ -53,18 +63,14 @@
             {% endif %}
 
             <!-- Список друзей -->
-            <div class="card shadow-sm border-0 rounded-4 p-3 bg-body-tertiary position-relative">
+            <div class="card shadow-sm border-0 rounded-4 p-3 position-relative bg-body-secondary">
                 <h5 class="fw-bold mb-3 pe-5">Мои друзья</h5>
 
                 <!--Кнопка разрешения пушей-->
                 <button id="enablePushBtn" type="button"
                         class="btn btn-sm btn-outline-secondary rounded-pill position-absolute top-0 end-0 m-3"
                         data-vapid-key="{{ vapid_public_key }}" data-csrf="{{ csrf_token }}">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor"
-                         class="bi bi-bell" viewBox="0 0 16 16">
-                        <path d="M8 16a2 2 0 0 0 2-2H6a2 2 0 0 0 2 2M8 1.918l-.797.161A4 4 0 0 0 4 6c0 .628-.134 2.197-.459 3.742-.16.767-.376 1.566-.663 2.258h10.244c-.287-.692-.502-1.49-.663-2.258C12.134 8.197 12 6.628 12 6a4 4 0 0 0-3.203-3.92zM14.22 12c.223.447.481.801.78 1H1c.299-.199.557-.553.78-1C2.68 10.2 3 6.88 3 6c0-2.42 1.72-4.44 4.005-4.901a1 1 0 1 1 1.99 0A5 5 0 0 1 13 6c0 .88.32 4.2 1.22 6"/>
-                    </svg>
-                    <span class="d-none d-sm-inline">Уведомления</span>
+                    <span class="d-none d-sm-inline">Разрешить пуши</span>
                 </button>
 
                 {% if friends %}
@@ -72,11 +78,14 @@
                 <div class="list-group list-group-flush rounded-3 overflow-hidden">
 
                     {% for item in friends %}
-                    <div class="list-group-item d-flex justify-content-between align-items-center py-3 bg-dark">
+                    <div class="list-group-item d-flex justify-content-between bg-body-tertiary border-bottom align-items-center py-3">
                         <div class="d-flex align-items-center gap-2">
-                            <div class="bg-primary bg-opacity-10 text-primary rounded-circle d-flex align-items-center justify-content-center fw-bold"
+                            <div class="rounded-circle overflow-hidden bg-primary bg-opacity-10 text-primary d-flex align-items-center justify-content-center fw-bold flex-shrink-0"
                                  style="width: 40px; height: 40px;">
-                                {{ item.user.username|slice:":1"|upper }}
+                                {% if item.user.profile.avatar %}
+                                <img src="{{ item.user.profile.avatar.url }}" alt=""
+                                     class="w-100 h-100 object-fit-cover">
+                                {% else %}{{ item.user.username|slice:":1"|upper }}{% endif %}
                             </div>
                             <span class="fw-semibold">{{ item.user.username }}</span>
                         </div>
@@ -87,9 +96,8 @@
                                class="btn btn-success rounded-circle d-flex align-items-center justify-content-center p-0"
                                style="width: 38px; height: 38px; min-width: 38px; min-height: 38px;">
                                 <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor"
-                                     class="bi bi-telephone-fill" viewBox="0 0 16 16">
-                                    <path fill-rule="evenodd"
-                                          d="M1.885.511a1.745 1.745 0 0 1 2.61.163L6.29 2.98c.329.423.445.974.315 1.494l-.547 2.19a.68.68 0 0 0 .178.643l2.457 2.457a.68.68 0 0 0 .644.178l2.189-.547a1.75 1.75 0 0 1 1.494.315l2.306 1.794c.829.645.905 1.87.163 2.611l-1.034 1.034c-.74.74-1.846 1.065-2.877.702a18.6 18.6 0 0 1-7.01-4.42 18.6 18.6 0 0 1-4.42-7.009c-.362-1.03-.037-2.137.703-2.877z"/>
+                                     class="bi bi-telephone" viewBox="0 0 16 16">
+                                    <path d="M3.654 1.328a.678.678 0 0 0-1.015-.063L1.605 2.3c-.483.484-.661 1.169-.45 1.77a17.6 17.6 0 0 0 4.168 6.608 17.6 17.6 0 0 0 6.608 4.168c.601.211 1.286.033 1.77-.45l1.034-1.034a.678.678 0 0 0-.063-1.015l-2.307-1.794a.68.68 0 0 0-.58-.122l-2.19.547a1.75 1.75 0 0 1-1.657-.459L5.482 8.062a1.75 1.75 0 0 1-.46-1.657l.548-2.19a.68.68 0 0 0-.122-.58zM1.884.511a1.745 1.745 0 0 1 2.612.163L6.29 2.98c.329.423.445.974.315 1.494l-.547 2.19a.68.68 0 0 0 .178.643l2.457 2.457a.68.68 0 0 0 .644.178l2.189-.547a1.75 1.75 0 0 1 1.494.315l2.306 1.794c.829.645.905 1.87.163 2.611l-1.034 1.034c-.74.74-1.846 1.065-2.877.702a18.6 18.6 0 0 1-7.01-4.42 18.6 18.6 0 0 1-4.42-7.009c-.362-1.03-.037-2.137.703-2.877z"/>
                                 </svg>
                             </a>
 
@@ -98,9 +106,9 @@
                                class="btn btn-success rounded-circle d-flex align-items-center justify-content-center p-0"
                                style="width: 38px; height: 38px; min-width: 38px; min-height: 38px;">
                                 <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor"
-                                     class="bi bi-camera-video-fill" viewBox="0 0 16 16">
+                                     class="bi bi-camera-video" viewBox="0 0 16 16">
                                     <path fill-rule="evenodd"
-                                          d="M0 5a2 2 0 0 1 2-2h7.5a2 2 0 0 1 1.983 1.738l3.11-1.382A1 1 0 0 1 16 4.269v7.462a1 1 0 0 1-1.406.913l-3.111-1.382A2 2 0 0 1 9.5 13H2a2 2 0 0 1-2-2z"/>
+                                          d="M0 5a2 2 0 0 1 2-2h7.5a2 2 0 0 1 1.983 1.738l3.11-1.382A1 1 0 0 1 16 4.269v7.462a1 1 0 0 1-1.406.913l-3.111-1.382A2 2 0 0 1 9.5 13H2a2 2 0 0 1-2-2zm11.5 5.175 3.5 1.556V4.269l-3.5 1.556zM2 4a1 1 0 0 0-1 1v6a1 1 0 0 0 1 1h7.5a1 1 0 0 0 1-1V5a1 1 0 0 0-1-1z"/>
                                 </svg>
                             </a>
                         </div>
@@ -117,19 +125,19 @@
 
         <!-- История звонков -->
         <div class="col-12 col-lg-5">
-            <div class="card shadow-sm border-0 rounded-4 p-3 bg-body-tertiary h-100">
+            <div class="card shadow-sm bg-body-secondary border-0 rounded-4 p-3 h-100">
                 <h5 class="fw-bold mb-3">История звонков</h5>
                 {% if call_history %}
 
                 <div class="list-group list-group-flush rounded-3 overflow-hidden">
                     {% for call in call_history %}
 
-                    <div class="list-group-item py-2 bg-dark small">
+                    <div class="list-group-item py-2 small bg-body-tertiary">
                         <div class="d-flex justify-content-between align-items-center">
                             {% if call.status == 'missed' %}
                             <span class="fw-bold d-flex align-items-center gap-2 text-danger">
                             {% else %}
-                            <span class="fw-bold d-flex align-items-center gap-2 text-light">
+                            <span class="fw-bold d-flex align-items-center gap-2">
                             {% endif %}
 
                                 {% if call.caller == request.user %}
@@ -173,6 +181,8 @@
     </div>
 </div>
 {% endblock %}
+
+{% block footer %}{% endblock %}
 
 {% block scripts %}
 <script src="/static/js/notification.js"></script>

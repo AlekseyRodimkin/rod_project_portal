@@ -6,6 +6,7 @@ from .views import (
     create_ticket,
     NotificationsView,
     AppLoginView,
+    profile_update
 )
 
 app_name = "accounts"
@@ -18,6 +19,7 @@ urlpatterns = [
     path("logout/", AppLogoutView.as_view(), name="logout"),
     # path("register/", RegisterView.as_view(), name="register"),
     path("", Main.as_view(), name="main"),
+    path("profile/update/", profile_update, name="profile_update"),
     path("services/", ServicesView.as_view(), name="services"),
     path("create-ticket/", create_ticket, name="create_ticket"),
     path("notifications/", NotificationsView.as_view(), name="notifications"),

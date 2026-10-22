@@ -31,4 +31,5 @@ USER appuser
 
 CMD ["uvicorn", "rod_project_portal.asgi:application", \
      "--host", "0.0.0.0", "--port", "8000", \
-     "--proxy-headers", "--forwarded-allow-ips", "*"]
+     "--proxy-headers", "--forwarded-allow-ips", "*", \
+     "--no-access-log"]

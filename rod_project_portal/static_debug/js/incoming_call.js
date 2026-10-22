@@ -45,6 +45,7 @@
     overlay.innerHTML = `
       <div class="card shadow-lg border-0 rounded-4 text-center p-4 bg-dark text-white" style="width: 320px;">
         <div class="small text-secondary mb-1">Входящий звонок</div>
+        <div id="incomingAvatar" class="rounded-circle overflow-hidden bg-secondary d-flex align-items-center justify-content-center fw-bold fs-1 mx-auto mb-3" style="width: 96px; height: 96px;"></div>
         <h4 class="fw-bold mb-4"></h4>
         <div class="d-flex justify-content-center gap-4">
           <button id="incomingDeclineBtn" class="btn btn-danger rounded-circle p-0" style="width:56px;height:56px;" title="Сбросить">
@@ -66,6 +67,17 @@
     overlay.querySelector('.small').textContent =
       call.audio ? 'Входящий аудиозвонок' : 'Входящий видеозвонок';
     overlay.querySelector('h4').textContent = call.caller || 'Неизвестно';
+
+    const av = overlay.querySelector('#incomingAvatar');
+    if (call.avatar) {
+      const img = document.createElement('img');
+      img.src = call.avatar;
+      img.className = 'w-100 h-100 object-fit-cover';
+      av.appendChild(img);
+    } else {
+      av.textContent = (call.caller || '?').charAt(0).toUpperCase();
+    }
+
     document.body.appendChild(overlay);
 
     // Вызов считаем активным только когда окно успешно создано
@@ -100,8 +112,7 @@
       try { msg = JSON.parse(ev.data); } catch (e) { return; }
 
       if (msg.type === 'incoming-call') {
-        showIncoming({ room: msg.room, url: msg.url, caller: msg.caller, audio: msg.audio });
-      } else if (msg.type === 'call-cancelled') {
+        showIncoming({ room: msg.room, url: msg.url, caller: msg.caller, audio: msg.audio, avatar: msg.avatar });      } else if (msg.type === 'call-cancelled') {
         // Звонящий бросил трубку, пока мы не ответили: закрываем окно (только если это тот же вызов)
         if (current && current.room === msg.room) hideIncoming();
       }

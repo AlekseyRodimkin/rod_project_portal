@@ -9,6 +9,7 @@ from .models import (
     UserTickets,
     GlobalNotification,
     UserNotification,
+    Profile
 )
 
 """
@@ -194,3 +195,40 @@ class UserNotificationAdmin(admin.ModelAdmin):
     search_fields = ["user__username", "title", "message"]
     readonly_fields = ["created_at"]
     list_per_page = 25
+
+
+from django.utils.html import format_html
+
+
+@admin.register(Profile)
+class ProfileAdmin(admin.ModelAdmin):
+    list_display = ("pk", "avatar_preview", "user_verbose", "has_avatar")
+    list_display_links = ("pk", "user_verbose")
+    list_filter = ()
+    search_fields = ("user__username", "user__first_name")
+    ordering = ("pk",)
+    list_per_page = 50
+    readonly_fields = ("avatar_preview",)
+    autocomplete_fields = ("user",)
+
+    def get_queryset(self, request):
+        """Оптимизация выгрузки пользователей"""
+        return Profile.objects.select_related("user")
+
+    @admin.display(description="Пользователь", ordering="user__username")
+    def user_verbose(self, obj: Profile) -> str:
+        """Имя или username"""
+        return obj.user.first_name or obj.user.username
+
+    @admin.display(description="Фото")
+    def avatar_preview(self, obj: Profile):
+        if obj.avatar:
+            return format_html(
+                '<img src="{}" style="width:48px;height:48px;border-radius:50%;object-fit:cover;">',
+                obj.avatar.url,
+            )
+        return "—"
+
+    @admin.display(description="Есть фото", boolean=True)
+    def has_avatar(self, obj: Profile) -> bool:
+        return bool(obj.avatar)

@@ -99,3 +99,4 @@ gen_vapid_keys.py
 cert.pem
 key.pem
 nginx_commands.py
+media/

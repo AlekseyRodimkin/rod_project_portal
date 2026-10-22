@@ -104,6 +104,12 @@ def get_other_participant(room_name, user):
 
 
 @database_sync_to_async
+def get_avatar_url(user):
+    profile = getattr(user, "profile", None)
+    return profile.avatar.url if profile and profile.avatar else ""
+
+
+@database_sync_to_async
 def create_call_record(caller, callee, room_name):
     from calls.models import CallHistory
     return CallHistory.create_with_limit(caller, callee, room_name).id
@@ -227,11 +233,13 @@ class CallConsumer(AsyncWebsocketConsumer):
                             if audio:
                                 call_url += "?mode=audio"
 
+                            avatar = await get_avatar_url(user)
                             # Окно «Ответить / Сбросить» (сначала, чтобы сбой push его не отменил)
                             payload = {
                                 "type": "incoming-call",
                                 "room": self.room_name,
                                 "caller": user.get_username(),
+                                "avatar": avatar,
                                 "url": call_url,
                                 "audio": audio,
                             }

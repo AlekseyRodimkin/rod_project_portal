@@ -7,6 +7,11 @@ from django.contrib.auth.decorators import login_required
 from django.views.generic import TemplateView, ListView
 from django.utils.decorators import method_decorator
 from django_ratelimit.decorators import ratelimit
+from django.contrib.auth import get_user_model, update_session_auth_hash
+from django.contrib.auth.forms import PasswordChangeForm
+from django.utils.http import url_has_allowed_host_and_scheme
+from django.views.decorators.http import require_POST
+from PIL import Image
 
 from .models import (
     UserProxy,
@@ -16,7 +21,10 @@ from .models import (
     UserTickets,
     UserNotification,
     GlobalNotification,
+    Profile
 )
+
+User = get_user_model()
 
 
 @method_decorator(
@@ -133,3 +141,78 @@ class NotificationsView(LoginRequiredMixin, ListView):
 
 # def redir(request):
 #     return redirect("accounts:main")
+
+@login_required
+@require_POST
+def profile_update(request):
+    """
+    Обработка форм окна профиля
+    Адрес: accounts:profile_update, только POST, только для авторизованных
+
+    Какое действие выполнять, определяет скрытое поле action:
+        - "avatar": смена фото
+            * файл не больше 5 МБ, проверяется, что это действительно изображение (Pillow verify)
+            * профиль создаётся, если его ещё нет (get_or_create)
+            * обрезка до квадрата 256x256, сжатие в WebP и удаление старого файла
+              выполняет метод Profile.save()
+        - "username": смена имени пользователя
+            * не пустое, до 150 символов
+            * уникальность проверяется без учёта регистра, свой текущий ник не считается занятым
+        - "password": смена пароля через PasswordChangeForm
+            * проверяются текущий пароль, совпадение новых и валидаторы Django
+            * update_session_auth_hash сохраняет сессию, чтобы пользователя не разлогинило
+
+    Результат каждого действия (успех или ошибка) выводится через messages
+    и показывается в блоке #flash-messages
+
+    Возвращает: redirect на страницу из поля next, откуда открыли окно.
+    Если next не передан или ведёт на другой сайт (url_has_allowed_host_and_scheme),
+    то на главную accounts:main
+    """
+
+    action = request.POST.get("action")
+    user = request.user
+
+    if action == "avatar":
+        f = request.FILES.get("avatar")
+        if not f:
+            messages.error(request, "Файл не выбран")
+        elif f.size > 5 * 1024 * 1024:
+            messages.error(request, "Фото больше 5 МБ")
+        else:
+            try:
+                Image.open(f).verify()  # проверяем, что это действительно картинка
+                f.seek(0)
+                profile, _ = Profile.objects.get_or_create(user=user)
+                profile.avatar = f
+                profile.save()
+                messages.success(request, "Фото обновлено")
+            except Exception:
+                messages.error(request, "Файл не является изображением")
+
+    elif action == "username":
+        name = request.POST.get("username", "").strip()
+        if not name or len(name) > 150:
+            messages.error(request, "Некорректное имя")
+        elif User.objects.filter(username__iexact=name).exclude(pk=user.pk).exists():
+            messages.error(request, "Это имя уже занято")
+        else:
+            user.username = name
+            user.save(update_fields=["username"])
+            messages.success(request, "Имя изменено")
+
+    elif action == "password":
+        form = PasswordChangeForm(user, request.POST)
+        if form.is_valid():
+            user = form.save()
+            update_session_auth_hash(request, user)  # чтобы не разлогинило
+            messages.success(request, "Пароль изменён")
+        else:
+            for errors in form.errors.values():
+                for e in errors:
+                    messages.error(request, e)
+
+    nxt = request.POST.get("next", "")
+    if not url_has_allowed_host_and_scheme(nxt, allowed_hosts={request.get_host()}):
+        nxt = "accounts:main"
+    return redirect(nxt)

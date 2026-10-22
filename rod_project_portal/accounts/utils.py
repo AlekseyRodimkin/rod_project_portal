@@ -1,5 +1,7 @@
 from django.contrib.staticfiles import finders
 from django.http import FileResponse, Http404
+from django.db.models import Q
+from calls.models import Friendship
 
 
 def unread_notifications_count(request):
@@ -26,10 +28,6 @@ def service_worker(request):
     """
     Отдаёт файл service worker по адресу /sw.js.
 
-    Зачем: service worker управляет только страницами «внутри» своей папки.
-    Из static/js/ он видел бы лишь адреса /static/js/..., а не весь сайт.
-    Эта функция отдаёт тот же файл с корня (/sw.js), и охват — весь сайт.
-
     Как работает: ищет js/sw.js в static-папках проекта, отдаёт его как
     JavaScript с заголовком Cache-Control: no-cache, чтобы браузер при каждой
     проверке брал свежую версию. Если файла нет — ответ 404.
@@ -40,3 +38,26 @@ def service_worker(request):
     response = FileResponse(open(path, "rb"), content_type="application/javascript")
     response["Cache-Control"] = "no-cache"  # чтобы обновления подхватывались сразу
     return response
+
+
+def profile_modal(request):
+    """
+    Контекстный процессор для окна профиля
+
+    Как работает:
+        - для неавторизованного пользователя ничего не добавляет
+        - берёт все подтверждённые дружбы (ACCEPTED), где текущий пользователь
+          либо инициатор (from_user), либо получатель (to_user)
+        - из каждой связи выбирает собеседника, то есть второго участника
+        - select_related подгружает профили (фото) одним запросом, без запроса на каждого друга
+
+    Возвращает: {"profile_friends": [User, ...]}, список друзей для блока «Контакты»
+    в окне профиля. Ключ доступен во всех шаблонах
+    """
+    user = request.user
+    if not user.is_authenticated:
+        return {}
+    qs = Friendship.objects.filter(
+        Q(from_user=user) | Q(to_user=user), status=Friendship.Status.ACCEPTED
+    ).select_related("from_user__profile", "to_user__profile")
+    return {"profile_friends": [f.to_user if f.from_user_id == user.id else f.from_user for f in qs]}

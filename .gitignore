@@ -135,3 +135,6 @@ initial_data.json
 
 cert.pem
 key.pem
+
+media/
+static/

@@ -229,3 +229,40 @@ class UserNotification(models.Model):
 
     def __str__(self):
         return f"{self.user.username}: {self.title}"
+
+
+import time
+from io import BytesIO
+from django.core.files.base import ContentFile
+from PIL import Image, ImageOps
+
+
+class Profile(models.Model):
+    """Модель профиля пользователя"""
+    user = models.OneToOneField(User, on_delete=models.CASCADE)
+    avatar = models.ImageField(upload_to="avatars/", blank=True, verbose_name="Фото")
+
+    def save(self, *args, **kwargs):
+        if self.avatar and not self.avatar._committed:
+            img = Image.open(self.avatar)
+            img = ImageOps.exif_transpose(img).convert("RGB")  # поворот как на телефоне
+            img = ImageOps.fit(img, (256, 256), Image.LANCZOS)  # обрезка по центру до квадрата
+            buf = BytesIO()
+            img.save(buf, "WEBP", quality=80)
+
+            if self.pk:
+                old = Profile.objects.filter(pk=self.pk).first()
+                if old and old.avatar:
+                    old.avatar.delete(save=False)  # удаляем прежнее фото с диска
+
+            # время в имени, чтобы браузер не показывал старую картинку из кэша
+            name = f"{self.user_id}_{int(time.time())}.webp"
+            self.avatar.save(name, ContentFile(buf.getvalue()), save=False)
+        super().save(*args, **kwargs)
+
+    class Meta:
+        verbose_name = "Профиль"
+        verbose_name_plural = "Профили"
+
+    def __str__(self):
+        return f"Profile #{self.user.username}"

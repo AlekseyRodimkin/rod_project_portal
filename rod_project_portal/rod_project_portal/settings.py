@@ -74,6 +74,7 @@ TEMPLATES = [
                 "django.contrib.messages.context_processors.messages",
                 "accounts.utils.unread_notifications_count",
                 "accounts.utils.is_superuser",
+                "accounts.utils.profile_modal",
             ],
         },
     },
@@ -139,7 +140,7 @@ STATICFILES_DIRS = [
 ]
 
 LOGIN_REDIRECT_URL = reverse_lazy("accounts:main")
-LOGIN_URL = "login/"
+LOGIN_URL = "accounts:login"
 
 # Хранение сессии 30 дней
 # Окончание сессии при закрытии браузера отключено
@@ -170,3 +171,7 @@ if not DEBUG:
 
 TURN_SECRET = os.getenv("TURN_SECRET", "")
 TURN_HOST = os.getenv("TURN_HOST", "")
+
+MEDIA_URL = "/media/"
+MEDIA_ROOT = BASE_DIR / "media"
+MEDIA_ROOT.mkdir(exist_ok=True)
