@@ -188,8 +188,6 @@ def profile_update(request):
                 profile.save()
                 messages.success(request, "Фото обновлено")
             except Exception as e:
-                import logging
-                logging.getLogger(__name__).exception("Ошибка загрузки аватара")
                 messages.error(request, "Не удалось загрузить фото")
 
     elif action == "username":
