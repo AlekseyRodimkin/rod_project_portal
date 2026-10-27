@@ -1,9 +1,7 @@
 {% extends 'accounts/base.html' %}
 {% load static %}
 
-{% block title %}
-VPN
-{% endblock %}
+{% block title %}VPN{% endblock %}
 
 {% block body %}
 <div class="mb-5 bg-body-tertiary">
@@ -324,7 +322,9 @@ VPN
 
 </div>
 {% endblock %}
+
+{% block footer %}{% endblock %}
+
 {% block scripts %}
 <script src="{% static '/js/copy.js' %}"></script>
-<script src="{% static '/js/notification.js' %}"></script>
 {% endblock %}

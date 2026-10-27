@@ -3,7 +3,6 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <!--    <meta name="theme-color" content="#0d6efd">-->
     <title>
         {% block title %}
         {% endblock %}
@@ -19,9 +18,12 @@
     <link rel="icon" type="image/png" href="{% static '/icons/favicon-96x96.png' %}" sizes="96x96"/>
     <link rel="icon" type="image/svg+xml" href="{% static '/icons/favicon.svg' %}"/>
     <link rel="shortcut icon" href="{% static '/icons/favicon.ico' %}"/>
+
     <link rel="apple-touch-icon" sizes="180x180" href="{% static '/icons/apple-touch-icon.png' %}"/>
-    <meta name="apple-mobile-web-app-title" content="Rod Project"/>
     <link rel="manifest" href="{% static '/icons/site.webmanifest' %}"/>
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="Rod Project">
 </head>
 
 <body class="bg-body-tertiary">
@@ -72,7 +74,7 @@
 
                 {% if user_is_admin %}
                 <a href="{% url 'admin:index' %}"
-                   class="btn btn-sm btn-outline-danger" target="_blank">
+                   class="btn btn-sm btn-danger" target="_blank">
                     Админка
                 </a>
                 {% endif %}
@@ -88,11 +90,6 @@
                     </span>
                     {% endif %}
                 </button>
-
-                <!--                <form method="post" action="{% url 'accounts:logout' %}" class="m-0">-->
-                <!--                    {% csrf_token %}-->
-                <!--                    <button type="submit" class="btn btn-sm text-reset">Выйти</button>-->
-                <!--                </form>-->
 
                 {% else %}
                 <!-- Если не авторизован -->
@@ -149,57 +146,54 @@
         <div class="modal-content rounded-4 overflow-hidden">
             <div class="modal-header">
                 <h5 class="modal-title">Профиль</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Закрыть"></button>
+                <button type="button" class="btn-close"
+                        data-bs-dismiss="modal" aria-label="Закрыть"></button>
             </div>
 
             <div class="modal-body">
-                <!-- Фото -->
                 <form method="post" action="{% url 'accounts:profile_update' %}" enctype="multipart/form-data"
                       class="text-center mb-4">
                     {% csrf_token %}
                     <input type="hidden" name="action" value="avatar">
                     <input type="hidden" name="next" value="{{ request.get_full_path }}">
                     <div class="rounded-circle overflow-hidden mx-auto bg-secondary d-flex align-items-center justify-content-center text-white fs-1 fw-bold"
-                         style="width: 96px; height: 96px;">
+                         style="width: 110px; height: 110px;">
                         {% if user.profile.avatar %}
                         <img src="{{ user.profile.avatar.url }}" alt="" class="w-100 h-100 object-fit-cover">
                         {% else %}{{ user.username|slice:":1"|upper }}{% endif %}
                     </div>
-                    <label class="btn btn-sm btn-outline-secondary mt-2">
+                    <label class="btn btn-sm btn-outline-secondary mt-2 rounded-pill">
                         Сменить фото
                         <input type="file" name="avatar" accept="image/*" hidden onchange="this.form.submit()">
                     </label>
                 </form>
 
-                <!-- Имя -->
                 <form method="post" action="{% url 'accounts:profile_update' %}" class="mb-4">
                     {% csrf_token %}
                     <input type="hidden" name="action" value="username">
                     <input type="hidden" name="next" value="{{ request.get_full_path }}">
                     <label class="form-label small text-body-secondary">Имя пользователя</label>
-                    <div class="input-group">
-                        <input type="text" name="username" class="form-control" value="{{ user.username }}"
-                               maxlength="150" required>
-                        <button class="btn btn-primary" type="submit">Сохранить</button>
+                    <div class="input-group rounded-pill border overflow-hidden">
+                        <input type="text" name="username" class="form-control border-0 shadow-none px-3 bg-transparent"
+                               value="{{ user.username }}" maxlength="150" required>
+                        <button class="btn btn-primary border-0 rounded-pill px-3" type="submit">Сохранить</button>
                     </div>
                 </form>
 
-                <!-- Пароль -->
                 <form method="post" action="{% url 'accounts:profile_update' %}" class="mb-4">
                     {% csrf_token %}
                     <input type="hidden" name="action" value="password">
                     <input type="hidden" name="next" value="{{ request.get_full_path }}">
                     <label class="form-label small text-body-secondary">Смена пароля</label>
-                    <input type="password" name="old_password" class="form-control mb-2"
+                    <input type="password" name="old_password" class="form-control mb-2 rounded-pill px-3"
                            placeholder="Текущий пароль" autocomplete="current-password" required>
-                    <input type="password" name="new_password1" class="form-control mb-2"
+                    <input type="password" name="new_password1" class="form-control mb-2 rounded-pill px-3"
                            placeholder="Новый пароль" autocomplete="new-password" required>
-                    <input type="password" name="new_password2" class="form-control mb-2"
+                    <input type="password" name="new_password2" class="form-control mb-2 rounded-pill px-3"
                            placeholder="Повторите новый пароль" autocomplete="new-password" required>
-                    <button class="btn btn-primary btn-sm" type="submit">Изменить пароль</button>
+                    <button class="btn btn-primary rounded-pill" type="submit">Изменить пароль</button>
                 </form>
 
-                <!-- Контакты -->
                 <div class="small text-body-secondary mb-2">Контакты</div>
                 {% for friend in profile_friends %}
                 <div class="d-flex align-items-center gap-2 py-1">
@@ -219,7 +213,7 @@
             <div class="modal-footer">
                 <form method="post" action="{% url 'accounts:logout' %}" class="m-0">
                     {% csrf_token %}
-                    <button type="submit" class="btn btn-danger btn-sm">Выйти</button>
+                    <button type="submit" class="btn btn-danger rounded-pill">Выйти</button>
                 </form>
             </div>
         </div>
@@ -227,6 +221,7 @@
 </div>
 {% endif %}
 
+<script src="/static/js/notification.js"></script>
 {% block scripts %}
 {% endblock %}
 </body>

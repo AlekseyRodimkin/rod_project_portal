@@ -9,7 +9,7 @@
 <div class="container py-4" style="max-width: 900px;">
     <div class="row g-4">
 
-        <!-- Карточка: Звонки -->
+        <!-- Карточка 1 -->
         <div class="col-12 col-sm-6 col-md-4">
             <a href="{% url 'calls:contacts' %}"
                class="card text-decoration-none shadow-sm border-0 rounded-4 h-100 p-3 bg-body transition-hover">
@@ -27,7 +27,7 @@
             </a>
         </div>
 
-        <!-- Карточка: YouTube -->
+        <!-- Карточка 2 -->
         <div class="col-12 col-sm-6 col-md-4">
             <a href="{% url 'youtube:youtube' %}"
                class="card text-decoration-none shadow-sm border-0 rounded-4 h-100 p-3 bg-body transition-hover">
@@ -45,7 +45,7 @@
             </a>
         </div>
 
-        <!-- Карточка: VPN / Proxy -->
+        <!-- Карточка 3 -->
         <div class="col-12 col-sm-6 col-md-4">
             <a href="{% url 'accounts:services' %}"
                class="card text-decoration-none shadow-sm border-0 rounded-4 h-100 p-3 bg-body transition-hover">
@@ -65,18 +65,4 @@
 
     </div>
 </div>
-
-<style>
-    .transition-hover {
-        transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
-    }
-    .transition-hover:hover {
-        transform: translateY(-4px);
-        box-shadow: 0 .5rem 1rem rgba(0,0,0,.15)!important;
-    }
-</style>
-{% endblock %}
-
-{% block scripts %}
-<script src="{% static '/js/notification.js' %}"></script>
 {% endblock %}
