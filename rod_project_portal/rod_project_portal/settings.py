@@ -2,12 +2,15 @@ from pathlib import Path
 from django.urls import reverse_lazy
 from dotenv import load_dotenv
 import os
+import mimetypes
 
 load_dotenv()
 BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = os.getenv("DJANGO_SECRET_KEY")
 DEBUG = os.getenv("DJANGO_DEBUG", "1") == "1"
 INTERNAL_IPS = ["127.0.0.1"]
+
+mimetypes.add_type("application/manifest+json", ".webmanifest", True)
 
 if DEBUG:
     import socket
