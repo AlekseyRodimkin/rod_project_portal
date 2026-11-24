@@ -91,11 +91,16 @@
     text-shadow: 0 2px 8px rgba(0, 0, 0, 0.8);
 }
 
-/* Моё изображение: сверху справа, размер задаётся в JS по формату камеры */
+/* Моё изображение: сверху справа, размер задан жёстко и не зависит от видео */
 .call-local {
-    position: absolute; top: calc(16px + env(safe-area-inset-top)); right: 16px; z-index: 3; width: 100px;
-    aspect-ratio: 9 / 16; border-radius: 1rem; overflow: hidden;
+    position: absolute; top: calc(16px + env(safe-area-inset-top)); right: 16px; z-index: 3;
+    width: 100px; height: 178px;
+    border-radius: 1rem; overflow: hidden;
     background: #000; box-shadow: 0 .25rem 1rem rgba(0, 0, 0, .5);
+}
+/* Компьютер: горизонтальная веб-камера, рамка шире и ниже */
+@media (min-width: 768px) {
+    .call-local { width: 150px; height: 112px; }
 }
 .call-local video {
     width: 100%;

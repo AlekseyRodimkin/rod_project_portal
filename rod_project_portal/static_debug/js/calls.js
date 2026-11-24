@@ -10,6 +10,8 @@ const status = t => {
 let ws = null; // WebSocket-соединение с сигнальным сервером
 pc = null; // WebRTC-соединение с собеседником (RTCPeerConnection)
 localStream = null; // свой поток (камера + микрофон)
+let facingMode = 'user';       // какая камера сейчас: 'user' = фронтальная, 'environment' = основная
+let switchingCamera = false;   // защита от повторного нажатия, пока идёт переключение
 
 // Очередь промисов: заставляет асинхронные сигнальные операции
 // выполняться строго по одной и в порядке поступления
@@ -223,15 +225,108 @@ $('toggleCamBtn').onclick = () => {
   const localVideo = $('local');
 
   if (videoTrack.enabled) { // Камера включена - показываем своё превью и тёмную кнопку
-    localVideo.style.display = 'block';
+    $('localWrapper').style.opacity = '1';
     $('toggleCamBtn').classList.remove('btn-danger');
     $('toggleCamBtn').classList.add('btn-dark');$('toggleCamBtn').title = 'Выключить камеру';
   } else {// Камера выключена - прячем превью и красим кнопку в красный
-    localVideo.style.display = 'none';
+    $('localWrapper').style.opacity = '0';
     $('toggleCamBtn').classList.remove('btn-dark');
     $('toggleCamBtn').classList.add('btn-danger');$('toggleCamBtn').title = 'Включить камеру';
   }
+
 };
+
+// Подгоняет рамку превью «Вы» под реальный формат камеры
+function fitLocalPreview() {}
+
+// Пересоздаёт превью «Вы» с нуля: новый <video> и новый MediaStream.
+// На iOS это надёжнее, чем менять трек внутри уже играющего видео
+function rebuildLocalPreview() {
+  const wrapper = $('localWrapper');
+  const old = $('local');
+  const fresh = document.createElement('video');
+  fresh.id = 'local';
+  fresh.autoplay = true;
+  fresh.muted = true;
+  fresh.playsInline = true;
+  fresh.style.transform = facingMode === 'user' ? 'scaleX(-1)' : 'none';
+  // отдельный поток только для превью: берём текущие видеотреки
+  fresh.srcObject = new MediaStream(localStream.getVideoTracks());
+  wrapper.replaceChild(fresh, old);
+  fresh.play().catch(() => {});
+}
+
+// Смена камеры (фронтальная <-> основная) без разрыва звонка
+async function switchCamera() {
+  if (switchingCamera || !localStream) return;
+  switchingCamera = true;
+
+  const newFacing = facingMode === 'user' ? 'environment' : 'user';
+  const oldTrack = localStream.getVideoTracks()[0];
+  const wasEnabled = oldTrack ? oldTrack.enabled : true; // запоминаем, не выключена ли камера кнопкой
+
+  try {
+    // На телефонах (особенно iOS) нельзя держать две камеры сразу,
+    // поэтому сначала останавливаем старый трек, затем запрашиваем новый
+    if (oldTrack) oldTrack.stop();
+
+    const newStream = await navigator.mediaDevices.getUserMedia({
+      video: { width: { ideal: 1280 }, height: { ideal: 720 }, facingMode: { ideal: newFacing } },
+      audio: false   // микрофон не трогаем, он остаётся прежним
+    });
+    const newTrack = newStream.getVideoTracks()[0];
+    newTrack.enabled = wasEnabled;
+
+    // Подменяем трек в уже установленном соединении: собеседник увидит новую камеру без переподключения
+    if (pc) {
+      const sender = pc.getSenders().find(s => s.track && s.track.kind === 'video')
+                  || pc.getSenders().find(s => !s.track);   // запасной вариант, если трек уже снят
+      if (sender) await sender.replaceTrack(newTrack);
+    }
+
+    // Обновляем локальный поток и превью «Вы»
+    if (oldTrack) localStream.removeTrack(oldTrack);
+    localStream.addTrack(newTrack);
+
+    facingMode = newFacing;      // сначала обновляем, функция ниже читает его для зеркала
+    rebuildLocalPreview();
+
+  } catch (err) {
+    console.error('Не удалось сменить камеру', err);
+    // Старый трек уже остановлен, пробуем вернуть прежнюю камеру, чтобы видео не пропало
+    try {
+      const back = await navigator.mediaDevices.getUserMedia({
+        video: { facingMode: { ideal: facingMode } }, audio: false
+      });
+      const backTrack = back.getVideoTracks()[0];
+      if (pc) {
+        const s = pc.getSenders().find(x => x.track === null || (x.track && x.track.kind === 'video'));
+        if (s) await s.replaceTrack(backTrack);
+      }
+      if (oldTrack) localStream.removeTrack(oldTrack);
+      localStream.addTrack(backTrack);
+      $('local').srcObject = localStream;
+    } catch (e) { console.error(e); }
+  } finally {
+    switchingCamera = false;
+  }
+}
+
+// Показываем кнопку смены камеры, только если на устройстве больше одной камеры
+async function setupSwitchCamButton() {
+  if (AUDIO_ONLY) return;   // в аудиозвонке камеры нет
+  try {
+    const devices = await navigator.mediaDevices.enumerateDevices();
+    const cams = devices.filter(d => d.kind === 'videoinput');
+    if (cams.length > 1) {
+      const btn = $('switchCamBtn');
+      btn.classList.remove('d-none');
+      btn.classList.add('d-flex');
+      btn.disabled = false;
+      btn.onclick = switchCamera;
+    }
+  } catch (e) { console.warn('Не удалось получить список камер', e); }
+}
 
 // Кнопка «Завершить звонок»
 $('leaveBtn').onclick = () => {
@@ -250,7 +345,7 @@ window.addEventListener('DOMContentLoaded', async () => {
   }
 
   try {
-    status('Запрос доступа к камере и микрофону...');
+    status('⁉️🎤🎥...');
 
     // Автоматически запрашиваем доступ
 //    localStream = await navigator.mediaDevices.getUserMedia({ video: !AUDIO_ONLY, audio: true });
@@ -263,22 +358,17 @@ window.addEventListener('DOMContentLoaded', async () => {
     localVideo.srcObject = localStream;
     localVideo.style.display = 'block';
 
-    // Когда известны размеры своей камеры - подгоняем контейнер превью
-    localVideo.onloadedmetadata = () => {
-      const w = localVideo.videoWidth;
-      const h = localVideo.videoHeight;
-      const localWrapper = $('localWrapper');
-      if (w && h) {
-        localWrapper.style.aspectRatio = `${w} / ${h}`;
-        localWrapper.style.width = w > h ? '150px' : '100px'; // горизонтальная камера чуть шире
-      }
-    };
+    // Пересчитываем размер рамки каждый раз, когда у видео меняется размер
+    // (первая загрузка, смена камеры, поворот телефона)
+    localVideo.onloadedmetadata = fitLocalPreview;
+    localVideo.onresize = fitLocalPreview;
 
     // Разблокируем кнопки управления камерой/микрофоном
     $('toggleCamBtn').disabled = false;
     $('toggleMicBtn').disabled = false;
+    setupSwitchCamButton();   // после выдачи доступа список камер содержит подписи и все устройства
 
-    status('Подключение...');
+    status('📞...');
 
     await loadIceServers();   // получаем TURN-данные до входа в комнату
     // Сразу же запускаем вход в комнату по WebSocket (после получения потока, чтобы дорожки уже были готовы)
@@ -288,7 +378,7 @@ window.addEventListener('DOMContentLoaded', async () => {
     // Отказ в доступе, нет устройств или небезопасный контекст (не HTTPS).
     // status('Ошибка доступа к камере/микрофону: ' + err.message);
 
-     status('Ошибка доступа к камере/микрофону');
+     status('🚫🎤🎥🚫');
      console.log(err.message)
     console.error(err);
   }
