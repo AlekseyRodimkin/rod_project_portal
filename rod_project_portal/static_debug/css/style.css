@@ -130,3 +130,11 @@
     font-size: 0.85rem;
     font-weight: 500;
 }
+
+/* Отступ под статус-бар в режиме веб-приложения (в обычном браузере env() равен 0) */
+header.fixed-top {
+    padding-top: env(safe-area-inset-top);
+}
+.container.pt-5 {
+    padding-top: calc(3rem + env(safe-area-inset-top)) !important;
+}
