@@ -1,8 +1,6 @@
 {
   "name": "Rod Project",
   "short_name": "Rod Project",
-  "start_url": "/portal/",
-  "scope": "/portal/",
   "icons": [
     {
       "src": "/static/icons/web-app-manifest-192x192.png",
