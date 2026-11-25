@@ -2,7 +2,7 @@
 <html lang="ru" data-bs-theme="dark">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>
         {% block title %}
         {% endblock %}
@@ -20,15 +20,14 @@
     <link rel="shortcut icon" href="{% static '/icons/favicon.ico' %}"/>
 
     <link rel="apple-touch-icon" sizes="180x180" href="{% static '/icons/apple-touch-icon.png' %}"/>
-    <link rel="manifest" href="{% static '/icons/site.json' %}"/>
+    <link rel="manifest" href="{% static '/icons/manifest.json' %}"/>
     <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="Rod Project">
 </head>
 
 <body class="bg-body-tertiary">
 {% block header %}
-<header class="bg-primary border-bottom" style="color: var(--bs-body-bg);">
+<header class="bg-primary border-bottom fixed-top" style="color: var(--bs-body-bg);">
     <div class="container-fluid px-2 px-md-3">
         <div class="d-flex align-items-center justify-content-between py-2 gap-2">
 
@@ -101,7 +100,7 @@
 </header>
 {% endblock %}
 
-<div class="container pb-2 mt-2">
+<div class="container pb-2 pt-5 mt-2">
 
     <div id="flash-messages">
         {% if messages %}
