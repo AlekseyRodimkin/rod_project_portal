@@ -181,16 +181,16 @@ function autoJoinRoom() { // Автоматический вход в комна
       // Служебные данные от собеседника (offer/answer/ice) — обрабатываем по очереди, ошибки выводим в консоль
       queue = queue.then(() => handleSignal(msg.data)).catch(console.error);
     } else if (msg.type === 'peer-left') {
-      endCall('Собеседник завершил звонок', 1500);
+      endCall('Завершено', 1500);
     } else if (msg.type === 'call-declined') {
-      endCall('Собеседник отклонил звонок', 1500);
+      endCall('Отклонено', 1500);
     } else if (msg.type === 'full') {
-      endCall('Комната занята.', 1500); // В комнате уже двое — закрываем сокет
+      endCall('Занято', 1500); // В комнате уже двое — закрываем сокет
     }
   };
 
   ws.onclose = () => {
-    endCall('Связь с сервером потеряна', 1500);
+    endCall('Сервер не отвечает', 1500);
   };
 }
 
@@ -330,7 +330,7 @@ async function setupSwitchCamButton() {
 
 // Кнопка «Завершить звонок»
 $('leaveBtn').onclick = () => {
-  endCall('Звонок завершен'); // Закрываем сигнальный канал (сервер сообщит собеседнику об уходе)
+  endCall('Завершено'); // Закрываем сигнальный канал (сервер сообщит собеседнику об уходе)
 };
 
 // Автоматический старт после загрузки страницы
@@ -345,7 +345,7 @@ window.addEventListener('DOMContentLoaded', async () => {
   }
 
   try {
-    status('⁉️🎤🎥...');
+    status('⁉️🎤🎥');
 
     // Автоматически запрашиваем доступ
 //    localStream = await navigator.mediaDevices.getUserMedia({ video: !AUDIO_ONLY, audio: true });
@@ -367,8 +367,7 @@ window.addEventListener('DOMContentLoaded', async () => {
     $('toggleCamBtn').disabled = false;
     $('toggleMicBtn').disabled = false;
     setupSwitchCamButton();   // после выдачи доступа список камер содержит подписи и все устройства
-
-    status('📞...');
+    status('Подключение');
 
     await loadIceServers();   // получаем TURN-данные до входа в комнату
     // Сразу же запускаем вход в комнату по WebSocket (после получения потока, чтобы дорожки уже были готовы)
@@ -377,7 +376,6 @@ window.addEventListener('DOMContentLoaded', async () => {
   } catch (err) {
     // Отказ в доступе, нет устройств или небезопасный контекст (не HTTPS).
     // status('Ошибка доступа к камере/микрофону: ' + err.message);
-
      status('🚫🎤🎥🚫');
      console.log(err.message)
     console.error(err);
