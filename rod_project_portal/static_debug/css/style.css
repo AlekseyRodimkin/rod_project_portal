@@ -112,7 +112,7 @@
 /* Панель управления поверх звонка */
 .call-controls {
     position: absolute; left: 50%; bottom: calc(40px + env(safe-area-inset-bottom)); transform: translateX(-50%);
-    z-index: 4; width: calc(100% - 32px); max-width: 360px;
+    z-index: 4; width: calc(100% - 42px); max-width: 360px;
     padding: 10px 10px; border-radius: 999px;
     background: rgba(0, 0, 0, .45);
 }
